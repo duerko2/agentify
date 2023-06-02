@@ -1,6 +1,11 @@
 .App {
   text-align: center;
 }
+.page{
+    display: grid;
+    grid-template-columns: 120px 1fr;
+
+}
 
 .App-logo {
   height: 40vmin;

@@ -1,24 +1,97 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, {useEffect, useState} from 'react';
+import './styles/App.css';
+import Login from "./pages/loginPage/Login";
+import {auth} from './firebase/firebase';
+import {onAuthStateChanged} from 'firebase/auth';
+import AddCustomer from "./forms/AddCustomer";
+import AddBrand from "./forms/AddBrand";
+import TopBar from "./routing/TopBar";
+import CustomerPage from "./pages/customerPage/CustomerPage";
+import BrandPage from "./pages/brandPage/BrandPage";
+import OrderPage from "./pages/orderPage/OrderPage";
+
+
+
 
 function App() {
-  return (
+    const [loggedIn, setLoggedIn] = useState<boolean>(false);
+    const [page, setPage] = useState<string>("frontpage");
+    const [navigating, setNavigating] = useState<boolean>(true);
+
+    useEffect(() => {
+        function popstateHandler() {
+            const url = new URLSearchParams(window.location.search);
+            const urlPage = url.get("page");
+            console.log("popstate", {urlPage});
+            setPage(urlPage || "frontpage");
+            setNavigating(true);
+        }
+        addEventListener("popstate", popstateHandler);
+        popstateHandler();
+        return () => {
+            removeEventListener("popstate", popstateHandler);
+        };
+    }, [])
+
+    useEffect(() => {
+        setNavigating(false);
+    }, [navigating]);
+
+
+    useEffect(() => {
+        onAuthStateChanged(auth,(nextUser) => {
+            if (nextUser) {
+                setLoggedIn(true);
+                // User is signed in, see docs for a list of available properties
+                // https://firebase.google.com/docs/reference/js/auth.user
+                const uid = nextUser.uid;
+                console.log(uid)
+                // ...
+            } else {
+                setLoggedIn(false);
+                navigate("frontpage");
+                // User is signed out
+                // ...
+            }
+        });
+        }, []);
+
+    function navigate(dest:string) {
+        history.pushState({}, "", "?page="+dest);
+        dispatchEvent(new PopStateEvent("popstate"));
+    }
+    const pageClasses = `card ${navigating ? "navigating" : "navigated"}`;
+
+
+    return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+        <TopBar
+            navigate={navigate}
+            loggedIn={loggedIn}/>
+        {loggedIn &&
+            page==="frontpage" &&
+            <div>
+                <h1>you are logged in</h1>
+            </div> ||
+            page==="customers" &&
+            <div>
+                <CustomerPage/>
+            </div> ||
+            page==="brands" &&
+            <div>
+                <BrandPage/>
+            </div> ||
+            page==="orders" &&
+            <div>
+                <OrderPage/>
+            </div>
+        }
+        {!loggedIn &&
+            <div>
+                <h1>Not logged in</h1>
+                <Login/>
+            </div>
+        }
     </div>
   );
 }
