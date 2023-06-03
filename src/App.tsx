@@ -22,7 +22,6 @@ function App() {
         function popstateHandler() {
             const url = new URLSearchParams(window.location.search);
             const urlPage = url.get("page");
-            console.log("popstate", {urlPage});
             setPage(urlPage || "frontpage");
             setNavigating(true);
         }

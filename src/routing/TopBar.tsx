@@ -16,9 +16,7 @@ function TopBarItem(props: { onClick : (destination:string) => void, name: strin
         function popstateHandler() {
             const url = new URLSearchParams(window.location.search);
             const urlPage = url.get("page");
-            console.log("popstate", {urlPage});
             if (urlPage === props.name.toLowerCase()) {
-                console.log("Setting " + props.name.toLowerCase() + " to active");
                 setActive({active: true, classname: "clickedTopBarItem"});
             } else {
                 setActive({active: false, classname: "topbarItem"});

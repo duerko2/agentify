@@ -1,90 +1,129 @@
 import React, {useEffect, useState} from "react";
-import {Customer, CustomerBrand} from "../../types/Types";
+import {Brand, Customer, CustomerBrand} from "../../types/Types";
 import {collection, DocumentReference, getDocs, query, where} from "firebase/firestore";
 import {auth, db} from "../../firebase/firebase";
 import {onAuthStateChanged} from "firebase/auth";
 import {createColumnHelper, flexRender, getCoreRowModel, useReactTable} from "@tanstack/react-table";
 
+
+type Order = {
+    amount:number;
+    brand:Brand;
+    customer:string;
+    season:string;
+    type:string;
+    uid:string;
+}
+
+
+
 export function OrderTable() {
-    const [data, setData] = useState<Customer[]>([]);
-    const brandMap = new Map<string, string>();
+    const [data, setData] = useState<Order[]>([]);
+    const seasonMap = new Map<string, string>();
+    const customerMap = new Map<string, string>();
+    const brandMap = new Map<string, Brand>();
+
 
     useEffect(() => {
         async function getData() {
-            const customerQuery = query(collection(db, "customer"), where("uid", "==", auth.currentUser?.uid));
-            const customerdata = await getDocs(customerQuery);
-            const customers: Customer[] = customerdata.docs.map((doc) => (
+            const orderQuery = query(collection(db, "order"), where("uid", "==", auth.currentUser?.uid));
+            const orderData = await getDocs(orderQuery);
+            const orders: Order[] = orderData.docs.map((doc) => (
                 {
-                    name: doc.data().name,
-                    address: doc.data().address,
-                    city: doc.data().city,
-                    country: doc.data().country,
-                    brands: doc.data().brands?.map(
-                        (brand: DocumentReference) =>
-                            (
-                                {
-                                    name: brandMap.get(brand.id),
-                                    id: brand.id
-                                } as CustomerBrand)),
-                } as Customer));
-            console.log(customers);
-
-            setData(customers);
+                    amount: doc.data().amount,
+                    brand: brandMap.get(doc.data().brand.id),
+                    customer: customerMap.get(doc.data().customer.id),
+                    season: seasonMap.get(doc.data().season.id),
+                    type: doc.data().type,
+                    uid: doc.data().uid,
+                } as Order));
+            setData(orders);
+            console.log(orders);
         };
 
         async function getBrands() {
             const brandsQuery = query(collection(db, "brand"), where("uid", "==", auth.currentUser?.uid));
             const brandsData = await getDocs(brandsQuery);
             brandsData.docs.forEach((doc) => {
-                brandMap.set(doc.id, doc.data().name);
+                brandMap.set(doc.id,
+                    {
+                        name: doc.data().name,
+                        commission: doc.data().commission,
+                        currency: doc.data().currency,
+                        uid: doc.data().uid,
+                    } as Brand);
             });
         }
 
-
-        onAuthStateChanged(auth, (nextUser) => {
-            getBrands().then(() => {
-                getData();
+        async function getSeasons() {
+            const seasonQuery = query(collection(db, "season"), where("uid", "==", auth.currentUser?.uid));
+            const seasonData = await getDocs(seasonQuery);
+            seasonData.docs.forEach((doc) => {
+                seasonMap.set(doc.id, doc.data().name);
             });
+        }
+
+        async function getCustomers() {
+            const customerQuery = query(collection(db, "customer"), where("uid", "==", auth.currentUser?.uid));
+            const customerData = await getDocs(customerQuery);
+            customerData.docs.forEach((doc) => {
+                customerMap.set(doc.id, doc.data().name);
+            });
+        }
+        if (auth.currentUser) {
+            getBrands().then(getSeasons).then(getCustomers).then(getData);
+        }
+        onAuthStateChanged(auth, (nextUser) => {
+            getBrands().then(getSeasons).then(getCustomers).then(getData);
         });
-        getBrands().then(() => {
-            getData();
-        });
+
     }, []);
 
 
-    const columnHelper = createColumnHelper<Customer>();
+    const columnHelper = createColumnHelper<Order>();
 
     const columns = [
-        columnHelper.accessor('name', {
-            header: 'Name',
+        columnHelper.accessor('customer', {
+            header: 'Customer',
             cell: info => info.getValue(),
             footer: info => info.column.id,
         }),
-        columnHelper.accessor('address', {
-            header: 'Address',
+        columnHelper.accessor('brand', {
+            header: 'Brand',
+            cell: info => info.getValue().name,
+            footer: info => info.column.id,
+        }),
+        columnHelper.accessor('season', {
+            header: 'Season',
             cell: info => info.getValue(),
             footer: info => info.column.id,
         }),
-        columnHelper.accessor('city', {
-            header: 'City',
+        columnHelper.accessor('type', {
+            header: 'Type',
             cell: info => info.getValue(),
             footer: info => info.column.id,
         }),
-        columnHelper.accessor('country', {
-            header: 'Country',
+        columnHelper.accessor('amount', {
+            header: 'Amount',
+            cell: info => (info.getValue()*1).toLocaleString(),
+            footer: info => info.column.id,
+        }),
+        columnHelper.accessor('brand.currency', {
+            header: 'Currency',
             cell: info => info.getValue(),
             footer: info => info.column.id,
         }),
-        columnHelper.accessor('brands', {
-            header: 'Brands',
-            cell: info => info.getValue()?.map((brand: CustomerBrand) => brand.name).join(", "),
-            footer: info => info.column.id,
+        columnHelper.accessor('brand.commission', {
+            header: 'Commission',
+            cell: info => (info.getValue()*info.row.original.amount*0.01).toLocaleString(),
         }),
+
+
     ];
     const table = useReactTable({
         data,
         columns,
-        getCoreRowModel: getCoreRowModel(),
+        getCoreRowModel: getCoreRowModel()
     });
 
     return (

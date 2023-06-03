@@ -39,16 +39,13 @@ export function CustomersTable() {
                 brandMap.set(doc.id, doc.data().name);
             });
         }
-
-
+        if(auth.currentUser) {
+            getBrands().then(getData);
+        }
         onAuthStateChanged(auth, (nextUser) => {
-            getBrands().then(() => {
-                getData();
-            });
+            getBrands().then(getData);
         });
-        getBrands().then(() => {
-            getData();
-        });
+
     }, []);
 
 
