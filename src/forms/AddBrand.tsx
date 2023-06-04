@@ -15,17 +15,27 @@ function AddBrand() {
     };
     async function handleSubmit(event: FormEvent) {
         event.preventDefault();
-        if(brand.uid){
-            try{
-                await addDoc(collection(db, "brand"), {
-                    commission: brand.commission,
-                    currency: brand.currency,
-                    name: brand.name,
-                    uid: brand.uid,
-                });
-            } catch (e) {
-                console.log(e)
-            }
+        if(!brand.uid){
+            return;
+        }
+        if(!brand.name){
+            return;
+        }
+        if (!brand.currency){
+            return;
+        }
+        if(!brand.commission){
+            return;
+        }
+        try{
+            await addDoc(collection(db, "brand"), {
+                commission: brand.commission,
+                currency: brand.currency,
+                name: brand.name,
+                uid: brand.uid,
+            });
+        } catch (e) {
+            console.log(e)
         }
         console.log(brand);
         setBrand({'name':'','currency':'','commission':0,uid:auth.currentUser?.uid || ''})
@@ -60,7 +70,7 @@ function AddBrand() {
                 <input
                     type="number"
                     name="commission"
-                    value={brand.commission}
+                    value={brand.commission as number}
                     onChange={handleChange}
                 />
             </label>

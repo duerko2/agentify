@@ -41,7 +41,7 @@ export function CustomersByBrand() {
     const [customers, setCustomers] = useState<Customer[]>([]);
     const [orders, setOrders] = useState<Order[]>([]);
     const [seasons, setSeasons] = useState<Season[]>([]);
-    const [data, setData] = useState<{ brand:Brand,season:{name:string,budget:number,order:number}[] }[]>([]);
+    const [data, setData] = useState<{ customer:Customer,season:{season:Season,budget:number,order:number}[]}[]>([]);
 
 
     useEffect(() => {
@@ -100,6 +100,7 @@ export function CustomersByBrand() {
             }
         });
     }, []);
+
     useEffect(() => {
         async function getOrders() {
             if(selectedBrand) {
@@ -122,12 +123,58 @@ export function CustomersByBrand() {
         if(auth.currentUser){
             getOrders();
         }
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                getOrders();
+    }, [selectedBrand]);
+
+    useEffect(() => {
+        function putData(){
+            if(!selectedBrand){
+                return;
             }
-        });
-    }
+            const customersByBrand = customers.filter((customer) => customer.brands.find((brand) => brand.id === selectedBrand.id));
+            console.log(customersByBrand);
+            const data = customersByBrand.map((customer) => {
+                const customerOrders = orders.filter((order) => order.customer.id === customer.id);
+                const customerSeasons = customerOrders.map((order) => {
+                    const season = seasons.find((season) => season.id === order.season.id);
+                    console.log(season);
+                    if(season){
+                        return {
+                            season: season,
+                            budget: order.amount,
+                            order: order.amount,
+                        }
+                    }
+                    return {
+                        season: {
+                            name: "",
+                            date: new Date(),
+                            uid: "",
+                            id: "",
+                        },
+                        budget: 0,
+                        order: 0,
+                    }
+                });
+                console.log(customerSeasons)
+                console.log(customer)
+                return {
+                    customer: customer,
+                    season: customerSeasons,
+                }
+            });
+            console.log(data);
+
+            data.forEach((d)=>{
+                d.season.sort((a,b) => {
+                    return b.season.date.getTime() - a.season.date.getTime();
+                });
+            });
+            console.log(data)
+            setData(data);
+        }
+        putData();
+
+    }, [orders]);
 
     function selectBrand(event:React.ChangeEvent){
         event.preventDefault();
@@ -135,13 +182,19 @@ export function CustomersByBrand() {
         const brand = brands.find((brand) => brand.id === target.value);
         if(brand){
             setSelectedBrand(brand);
+            console.log(brand);
         }
     }
 
 
-    const columnHelper = createColumnHelper<{ brand:Brand,season:{name:string,budget:number,order:number}[]}>();
+    const columnHelper = createColumnHelper<{ customer:Customer,season:{name:string,budget:number,order:number}[]}>();
 
     const columns = [
+        columnHelper.accessor("customer", {
+            header: "Customer",
+            cell: (info) => info.getValue,
+            footer: (info) => "Total"
+        }),
     ];
     const table = useReactTable({
         data,
