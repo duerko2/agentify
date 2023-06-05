@@ -41,7 +41,7 @@ export function CustomersByBrand() {
     const [customers, setCustomers] = useState<Customer[]>([]);
     const [orders, setOrders] = useState<Order[]>([]);
     const [seasons, setSeasons] = useState<Season[]>([]);
-    const [data, setData] = useState<{ customer:Customer,season:{season:Season,budget:number,order:number}[]}[]>([]);
+    const [data, setData] = useState<{ customer:Customer,wholeSeason:{season:Season,budget:number,order:number}[]}[]>([]);
 
 
     useEffect(() => {
@@ -159,13 +159,13 @@ export function CustomersByBrand() {
                 console.log(customer)
                 return {
                     customer: customer,
-                    season: customerSeasons,
+                    wholeSeason: customerSeasons,
                 }
             });
             console.log(data);
 
             data.forEach((d)=>{
-                d.season.sort((a,b) => {
+                d.wholeSeason.sort((a,b) => {
                     return b.season.date.getTime() - a.season.date.getTime();
                 });
             });
@@ -187,15 +187,35 @@ export function CustomersByBrand() {
     }
 
 
-    const columnHelper = createColumnHelper<{ customer:Customer,season:{name:string,budget:number,order:number}[]}>();
+    const columnHelper = createColumnHelper<{ customer:Customer,wholeSeason:{season:Season,budget:number,order:number}[]}>();
+    const subColumnHelper = createColumnHelper<{season:Season,budget:number,order:number}>();
 
     const columns = [
         columnHelper.accessor("customer", {
             header: "Customer",
-            cell: (info) => info.getValue,
-            footer: (info) => "Total"
+            cell: (info) => info.getValue().name,
+            footer: info => info.column.id,
         }),
-    ];
+        columnHelper.accessor("wholeSeason", {
+            header: "Whole Season",
+            cell: (info) => info.getValue().reduce((acc, curr) => acc + curr.order, 0),
+            footer: info => info.column.id,
+        })
+    ]
+    const extra = seasons.map((season) => {
+
+        return columnHelper.accessor("wholeSeason", {
+            header: season.name,
+            cell: (info) => {
+                const seasonInfo = info.getValue().find((s) => s.season.name === season.name)
+                if(seasonInfo)
+                    return seasonInfo.order;
+            },
+            footer: info => info.column.id,
+        })
+    })
+
+    columns.push(...extra);
     const table = useReactTable({
         data,
         columns,
