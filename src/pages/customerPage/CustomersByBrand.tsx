@@ -118,6 +118,7 @@ export function CustomersByBrand() {
                     } as Order
                 });
                 setOrders(orders);
+                console.log(orders);
             }
         }
         if(auth.currentUser){
@@ -131,12 +132,10 @@ export function CustomersByBrand() {
                 return;
             }
             const customersByBrand = customers.filter((customer) => customer.brands.find((brand) => brand.id === selectedBrand.id));
-            console.log(customersByBrand);
             const data = customersByBrand.map((customer) => {
                 const customerOrders = orders.filter((order) => order.customer.id === customer.id);
                 const customerSeasons = customerOrders.map((order) => {
                     const season = seasons.find((season) => season.id === order.season.id);
-                    console.log(season);
                     if(season){
                         return {
                             season: season,
@@ -155,21 +154,17 @@ export function CustomersByBrand() {
                         order: 0,
                     }
                 });
-                console.log(customerSeasons)
-                console.log(customer)
                 return {
                     customer: customer,
                     wholeSeason: customerSeasons,
                 }
             });
-            console.log(data);
 
             data.forEach((d)=>{
                 d.wholeSeason.sort((a,b) => {
                     return b.season.date.getTime() - a.season.date.getTime();
                 });
             });
-            console.log(data)
             setData(data);
         }
         putData();
@@ -182,7 +177,6 @@ export function CustomersByBrand() {
         const brand = brands.find((brand) => brand.id === target.value);
         if(brand){
             setSelectedBrand(brand);
-            console.log(brand);
         }
     }
 
@@ -198,7 +192,7 @@ export function CustomersByBrand() {
         }),
         columnHelper.accessor("wholeSeason", {
             header: "Whole Season",
-            cell: (info) => info.getValue().reduce((acc, curr) => acc + curr.order, 0),
+            cell: (info) => info.getValue().reduce((acc, curr) => curr.order+acc, 0),
             footer: info => info.column.id,
         })
     ]
