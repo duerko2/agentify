@@ -189,27 +189,67 @@ export function CustomersByBrand() {
             header: "Customer",
             cell: (info) => info.getValue().name,
             footer: info => info.column.id,
+            id: "customer"
+        }),
+        columnHelper.accessor("customer", {
+            header: "City",
+            cell: (info) => info.getValue().city,
+            footer: info => info.column.id,
+            id: "city"
+        }),
+        columnHelper.accessor("customer", {
+            header: "Country",
+            cell: (info) => info.getValue().country,
+            footer: info => info.column.id,
+            id: "country"
         }),
         columnHelper.accessor("wholeSeason", {
-            header: "Whole Season",
-            cell: (info) => info.getValue().reduce((acc, curr) => curr.order+acc, 0),
+            header: "All Orders",
+            cell: (info) => info.getValue().reduce((acc, curr) => parseFloat(curr.order) + parseFloat(acc),0).toLocaleString(),
             footer: info => info.column.id,
+            id: "allOrders"
         })
     ]
-    const extra = seasons.map((season) => {
+    const seasonColumns = seasons.map((season) => {
 
-        return columnHelper.accessor("wholeSeason", {
-            header: season.name,
-            cell: (info) => {
-                const seasonInfo = info.getValue().find((s) => s.season.name === season.name)
-                if(seasonInfo)
-                    return seasonInfo.order;
-            },
-            footer: info => info.column.id,
-        })
+        return [
+            columnHelper.accessor("wholeSeason", {
+                header: season.name + " Budget",
+                cell: (info) => {
+                    const seasonInfo = info.getValue().find((s) => s.season.name === season.name)
+                    if(seasonInfo)
+                        return parseFloat(seasonInfo.budget).toLocaleString();
+                    else return 0;
+                },
+                footer: info => info.column.id,
+                id: season.name + "Budget",
+            }),
+            columnHelper.accessor("wholeSeason", {
+                header: season.name + " Order",
+                cell: (info) => {
+                    const seasonInfo = info.getValue().find((s) => s.season.name === season.name)
+                    if(seasonInfo)
+                        return parseFloat(seasonInfo.order).toLocaleString();
+                    else return 0;
+                },
+                footer: info => info.column.id,
+                id: season.name + "Order",
+            }),
+            columnHelper.accessor("wholeSeason", {
+                header: season.name + " Delta",
+                cell: (info) => {
+                    const seasonInfo = info.getValue().find((s) => s.season.name === season.name)
+                    if(seasonInfo)
+                        return parseFloat(seasonInfo.order-seasonInfo.budget).toLocaleString();
+                    else return 0;
+                },
+                footer: info => info.column.id,
+                id: season.name + "diff",
+            })
+        ]
     })
 
-    columns.push(...extra);
+    columns.push(...seasonColumns.flat());
     const table = useReactTable({
         data,
         columns,
