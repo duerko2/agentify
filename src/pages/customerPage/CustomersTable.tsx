@@ -4,9 +4,14 @@ import {collection, DocumentReference, getDocs, query, where} from "firebase/fir
 import {auth, db} from "../../firebase/firebase";
 import {onAuthStateChanged} from "firebase/auth";
 import {createColumnHelper, flexRender, getCoreRowModel, useReactTable} from "@tanstack/react-table";
+import {render} from "react-dom";
+import {ChangeCustomer} from "../../forms/ChangeCustomer";
+
+
 
 export function CustomersTable() {
     const [data, setData] = useState<Customer[]>([]);
+    const [changeCustomer, setChangeCustomer] = useState<{show:boolean,customer:Customer}>({show:false,customer: {id:"",name:"",address:"",city:"",country:"",brands:[]}});
     const brandMap = new Map<string, string>();
 
     useEffect(() => {
@@ -15,6 +20,7 @@ export function CustomersTable() {
             const customerdata = await getDocs(customerQuery);
             const customers: Customer[] = customerdata.docs.map((doc) => (
                 {
+                    id : doc.id,
                     name: doc.data().name,
                     address: doc.data().address,
                     city: doc.data().city,
@@ -46,7 +52,7 @@ export function CustomersTable() {
             getBrands().then(getData);
         });
 
-    }, []);
+    }, [changeCustomer]);
 
 
     const columnHelper = createColumnHelper<Customer>();
@@ -84,6 +90,11 @@ export function CustomersTable() {
         getCoreRowModel: getCoreRowModel(),
     });
 
+    function customerClick(customer:Customer) {
+        // Open a separate window with the customer details that the user can edit and save
+        setChangeCustomer({show:true,customer:customer});
+    }
+
     return (
         <div className="customers">
             <h1>Customers</h1>
@@ -107,7 +118,7 @@ export function CustomersTable() {
                     </thead>
                     <tbody>
                     {table.getRowModel().rows.map(row => (
-                        <tr key={row.id}>
+                        <tr key={row.id} onClick={()=>customerClick(row.original)}>
                             {row.getVisibleCells().map(cell => (
                                 <td key={cell.id}>
                                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -118,6 +129,14 @@ export function CustomersTable() {
                     </tbody>
                 </table>
             </div>
+            {changeCustomer.show &&
+            <div className="changecustomer">
+                <ChangeCustomer
+                    customer={changeCustomer.customer}
+                    setChangeCustomer={setChangeCustomer}
+                />
+            </div>
+            }
         </div>
     );
 }

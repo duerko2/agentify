@@ -6,8 +6,7 @@ table {
     border: 1px solid lightgray;
     border-spacing: 0px
 }
-tbody {
-}
+
 th {
     border-bottom: 1px solid lightgray;
     border-right: 1px solid lightgray;
@@ -25,4 +24,8 @@ tfoot {
 
 tfoot th {
     font-weight: normal;
+}
+tbody tr:hover {
+    background-color: #e6e6e6;
+    cursor: pointer;
 }

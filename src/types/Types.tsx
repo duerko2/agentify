@@ -14,6 +14,7 @@ interface Brand {
 }
 
 interface Customer {
+    id: string;
     address: string;
     name: string;
     city: string;

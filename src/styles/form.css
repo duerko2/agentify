@@ -1,0 +1,12 @@
+.form-box {
+    position: absolute;
+    top: 0;
+    left: 0;
+    padding: 20px;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    z-index: 9999;
+    flex-direction: column;
+    display: flex;
+    align-items: flex-start;
+}

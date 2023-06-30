@@ -12,8 +12,9 @@ import {BrandCard} from "./BrandCard";
 
 
 function AddCustomer() {
-    const [availableBrands, setAvailableBrands] = useState<CustomerBrand[]>([]);
+    const [availableBrands, setAvailableBrands] = useState<{brandDetails: CustomerBrand,chosen: boolean}[]>([]);
     const [customer, setCustomer] = useState<Customer>({
+        id: '',
         address: '',
         name: '',
         city: '',
@@ -26,7 +27,7 @@ function AddCustomer() {
             const brandsQuery = query(collection(db, "brand"), where("uid", "==", auth.currentUser?.uid));
             const brandsData = await getDocs(brandsQuery);
             const brands: CustomerBrand[] = brandsData.docs.map((doc) => ({name: doc.data().name, id: doc.id, ref:doc.ref} as CustomerBrand));
-            setAvailableBrands(brands)
+            setAvailableBrands(brands.map((brand) => ({brandDetails: brand, chosen: false})));
             console.log(brands);
         };
         getBrands();
@@ -65,6 +66,7 @@ function AddCustomer() {
         }
         // Reset the form
         setCustomer({
+            ...customer,
             address: '',
             name: '',
             city: '',
@@ -74,14 +76,25 @@ function AddCustomer() {
     };
 
     function onBrandClick(brand: CustomerBrand) {
-        setCustomer({
-            ...customer,
-            brands: [...customer.brands, brand],
-        });
-        setAvailableBrands(availableBrands.filter((b) => b.id !== brand.id));
-        console.log("Clicked on brand: " + brand.name);
-        console.log("Customer brands: " + customer.brands);
-        console.log("Available brands: " + availableBrands);
+        if(customer.brands.includes(brand)) {
+            setCustomer({
+                ...customer,
+                brands: customer.brands.filter((customerBrand) => customerBrand.id !== brand.id),
+            });
+        } else {
+            setCustomer({
+                ...customer,
+                brands: [...customer.brands, brand],
+            });
+        }
+        setAvailableBrands(availableBrands.map((availableBrand) => {
+            if (availableBrand.brandDetails.id === brand.id) {
+                return {brandDetails: availableBrand.brandDetails, chosen: !availableBrand.chosen};
+            } else {
+                return availableBrand;
+            }
+        }));
+        customer.brands.forEach((brand) => console.log(brand.name));
     }
 
     return (

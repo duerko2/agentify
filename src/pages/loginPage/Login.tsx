@@ -1,6 +1,6 @@
 import React, { useState, ChangeEvent, FormEvent } from 'react';
 import { auth } from '../../firebase/firebase';
-import { signInWithEmailAndPassword } from "firebase/auth";
+import {browserSessionPersistence, setPersistence, signInWithEmailAndPassword} from "firebase/auth";
 import firebase from "firebase/compat";
 
 interface LoginProps {
@@ -32,10 +32,25 @@ const Login: React.FC<LoginProps> = () => {
                     console.log("HERE")
                     console.log(user.email);
                 });
-        } catch (error) {
-            console.log(error);
+            setPersistence(auth, browserSessionPersistence)
+                .then(() => {
+                        return signInWithEmailAndPassword(auth, form.email, form.password)
+                            .then((userCredential) => {
+                                const user = userCredential.user;
+                                auth.updateCurrentUser(user)
+                            })
+                            .catch((error) => {
+                                console.log(error);
+                            });
+                    }
+                ).catch((error) => {
+                console.log(error);
+            });
         }
-    };
+        catch (e) {
+            console.log(e);
+        };
+    }
 
     return (
         <div>
