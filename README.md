@@ -1,46 +1,39 @@
-# Getting Started with Create React App
+# Agentify
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Welcome to the Agentify project! This readme file provides an overview of the project, its features, installation instructions, and other important details.
 
-## Available Scripts
+## Project Overview
+Agentify is a web application designed to serve as a platform for agencies working as third-party sales teams for different brands. The goal of this project is to provide agencies with a centralized system to manage their sales operations efficiently. The application is built using React and integrates with Google Firebase as the backend.
 
-In the project directory, you can run:
+## Features
+The project aims to have the following features
 
-### `npm start`
+- User Authentication: Allow agency staff to sign up, sign in, and manage their accounts securely.
+- Dashboard: Provide an overview of sales performance, key metrics, and important notifications.
+- Brand Management: Allow agencies to add, edit, and manage the brands they represent.
+- Sales Team Management: Enable agencies to add, remove, and manage their sales team members.
+- Leads Management: Provide a system to track leads, assign them to sales team members, and monitor the progress.
+- Reporting: Generate reports on sales performance, leads conversion, and other key metrics.
+- Notifications: Send notifications to agency staff regarding new leads, important updates, etc.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+  
+Please note that the above features are a work in progress and may not be fully implemented yet. Additional features and improvements are planned for future iterations.
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+## Contributing
+Contributions to the project are welcome! If you would like to contribute, please follow these guidelines:
 
-### `npm test`
+- Fork the repository on GitHub.
+- Clone your forked repository to your local machine.
+- Create a new branch to work on your feature or bug fix.
+- Make your changes and commit them with descriptive commit messages.
+- Push your changes to your forked repository.
+- Submit a pull request from your branch to the original repository.
+- Wait for the project maintainers to review and merge your pull request.
+- Please ensure that your contributions align with the project's goals and follow the established coding style and guidelines.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## License
+This project is currently unlicensed. A license will be added in the future.
 
-### `npm run build`
+As the project is a work in progress, it is essential to keep in mind that the current codebase may undergo significant changes, and features may be added or removed.
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
+Feel free to reach out if you have any questions or need further assistance. Happy coding!
