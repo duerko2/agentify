@@ -4,6 +4,7 @@ import {auth, db} from "../firebase/firebase";
 import '../styles/AddCustomer.css';
 import {CustomerBrand, Customer} from "../types/Types";
 import {BrandCard} from "./BrandCard";
+import {countries} from "../data/Countries";
 
 
 
@@ -21,6 +22,7 @@ function AddCustomer() {
         country: '',
         brands: [],
     });
+    const [error, setError] = useState<{message:string,show:boolean}>({message:"",show:false});
 
     useEffect(() => {
         async function getBrands() {
@@ -39,6 +41,7 @@ function AddCustomer() {
             ...prevCustomer,
             [name]: value,
         }));
+        setError({message:"",show:false})
     };
 
     const handleSubmit = async (event: FormEvent) => {
@@ -46,6 +49,13 @@ function AddCustomer() {
         // Perform any additional actions with the customer data (e.g., submit to server)
         console.log(customer);
         const uid = auth.currentUser?.uid;
+
+        if(!countries.map((country) => country.name).includes(customer.country)) {
+            setError({message:"Enter a valid country",show:true})
+            return;
+        } else {
+            setError({message:"",show:false})
+        }
 
         if (uid) {
             try {
@@ -59,10 +69,10 @@ function AddCustomer() {
                     brands: brandRefs,
                 });
             } catch (e) {
-                console.error("Error adding document: ", e);
+                setError({message:"Error adding to database. Try again later",show:true})
             }
         } else {
-            console.log("User not logged in");
+            setError({message:"User not logged in.",show:true});
         }
         // Reset the form
         setCustomer({
@@ -73,6 +83,10 @@ function AddCustomer() {
             country: '',
             brands: [],
         });
+        setAvailableBrands(availableBrands.map((availableBrand) => {
+            return {brandDetails: availableBrand.brandDetails, chosen: false};
+        }));
+        setError({message:"New customer Added",show:true})
     };
 
     function onBrandClick(brand: CustomerBrand) {
@@ -100,6 +114,7 @@ function AddCustomer() {
     return (
         <form onSubmit={handleSubmit} method="dialog">
             <h3>Add a Customer</h3>
+            <h4>Customer Details</h4>
             <label>
                 Address:
                 <input
@@ -140,7 +155,7 @@ function AddCustomer() {
                 />
             </label>
             <br/>
-            <h4>Available Brands</h4>
+            <h4>Available brands</h4>
             <div className="brandContainer">
                 {availableBrands.map((brand) => (
                         <BrandCard brand={brand} onClick={onBrandClick}/>
@@ -148,6 +163,7 @@ function AddCustomer() {
                 )}
             </div>
             <button type="submit">Submit</button>
+            {error.show && <p>{error.message}</p>}
         </form>
     );
 }
