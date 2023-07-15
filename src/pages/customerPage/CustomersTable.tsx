@@ -4,8 +4,9 @@ import {collection, DocumentReference, getDocs, query, where} from "firebase/fir
 import {auth, db} from "../../firebase/firebase";
 import {onAuthStateChanged} from "firebase/auth";
 import {createColumnHelper, flexRender, getCoreRowModel, useReactTable} from "@tanstack/react-table";
-import {render} from "react-dom";
 import {ChangeCustomer} from "../../forms/ChangeCustomer";
+import "../../styles/tables.css";
+import "../../styles/overlays.css";
 
 
 
@@ -131,6 +132,7 @@ export function CustomersTable() {
             </div>
             {changeCustomer.show &&
             <div className="changecustomer">
+                <div className="opaque-overlay"/>
                 <ChangeCustomer
                     customer={changeCustomer.customer}
                     setChangeCustomer={setChangeCustomer}

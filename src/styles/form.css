@@ -1,7 +1,7 @@
-.form-box {
-    position: absolute;
-    top: 0;
-    left: 0;
+.form-box-window {
+    position: fixed;
+    top: 50%;
+    left: 50%;
     padding: 20px;
     background-color: #fff;
     border: 1px solid #ccc;
@@ -9,4 +9,12 @@
     flex-direction: column;
     display: flex;
     align-items: flex-start;
+}
+
+.close-button {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    padding: 0px 3px 0px 3px;
+    cursor: pointer;
 }

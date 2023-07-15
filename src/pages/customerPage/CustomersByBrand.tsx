@@ -35,13 +35,44 @@ type Season = {
     uid:string;
     id:string;
 }
+
+const columnHelper = createColumnHelper<{ customer:Customer,wholeSeason:{season:Season,budget:number,order:number}[]}>();
+
 export function CustomersByBrand() {
     const [selectedBrand, setSelectedBrand] = useState<Brand>();
     const [brands, setBrands] = useState<Brand[]>([]);
     const [customers, setCustomers] = useState<Customer[]>([]);
     const [orders, setOrders] = useState<Order[]>([]);
     const [seasons, setSeasons] = useState<Season[]>([]);
+    const [selectedSeasons, setSelectedSeasons] = useState<{firstIndex:number,lastIndex:number}>({firstIndex:0,lastIndex:0});
     const [data, setData] = useState<{ customer:Customer,wholeSeason:{season:Season,budget:number,order:number}[]}[]>([]);
+    const [columns, setColumns] = useState([
+        columnHelper.accessor("customer", {
+            header: "Customer",
+            cell: (info) => info.getValue().name,
+            footer: info => info.column.id,
+            id: "customer"
+        }),
+        columnHelper.accessor("customer", {
+            header: "City",
+            cell: (info) => info.getValue().city,
+            footer: info => info.column.id,
+            id: "city"
+        }),
+        columnHelper.accessor("customer", {
+            header: "Country",
+            cell: (info) => info.getValue().country,
+            footer: info => info.column.id,
+            id: "country"
+        }),
+        columnHelper.accessor("wholeSeason", {
+            header: "All Orders",
+            cell: (info) => info.getValue().reduce((acc, curr) => parseFloat(curr.order.toString()) + parseFloat(acc.toString()),0).toLocaleString() + " " + selectedBrand?.currency,
+            footer: info => info.column.id,
+            id: "allOrders"
+        })
+    ]);
+
 
 
     useEffect(() => {
@@ -80,10 +111,14 @@ export function CustomersByBrand() {
             const seasons : Season[] = seasonData.docs.map((doc) => {
                 return {
                     name: doc.data().name,
-                    date: doc.data().date,
+                    date: doc.data().date.toDate(),
                     uid: doc.data().uid,
                     id: doc.id,
                 } as Season});
+            seasons.sort((a,b) => {
+                console.log(a.date.getTime());
+                return a.date.getTime() - b.date.getTime();
+            });
             setSeasons(seasons);
         }
         if(auth.currentUser){
@@ -181,123 +216,168 @@ export function CustomersByBrand() {
     }
 
 
-    const columnHelper = createColumnHelper<{ customer:Customer,wholeSeason:{season:Season,budget:number,order:number}[]}>();
-    const subColumnHelper = createColumnHelper<{season:Season,budget:number,order:number}>();
 
-    const columns = [
-        columnHelper.accessor("customer", {
-            header: "Customer",
-            cell: (info) => info.getValue().name,
-            footer: info => info.column.id,
-            id: "customer"
-        }),
-        columnHelper.accessor("customer", {
-            header: "City",
-            cell: (info) => info.getValue().city,
-            footer: info => info.column.id,
-            id: "city"
-        }),
-        columnHelper.accessor("customer", {
-            header: "Country",
-            cell: (info) => info.getValue().country,
-            footer: info => info.column.id,
-            id: "country"
-        }),
-        columnHelper.accessor("wholeSeason", {
-            header: "All Orders",
-            cell: (info) => info.getValue().reduce((acc, curr) => parseFloat(curr.order) + parseFloat(acc),0).toLocaleString(),
-            footer: info => info.column.id,
-            id: "allOrders"
-        })
-    ]
-    const seasonColumns = seasons.map((season) => {
 
-        return [
-            columnHelper.accessor("wholeSeason", {
-                header: season.name + " Budget",
-                cell: (info) => {
-                    const seasonInfo = info.getValue().find((s) => s.season.name === season.name)
-                    if(seasonInfo)
-                        return parseFloat(seasonInfo.budget).toLocaleString();
-                    else return 0;
-                },
-                footer: info => info.column.id,
-                id: season.name + "Budget",
-            }),
-            columnHelper.accessor("wholeSeason", {
-                header: season.name + " Order",
-                cell: (info) => {
-                    const seasonInfo = info.getValue().find((s) => s.season.name === season.name)
-                    if(seasonInfo)
-                        return parseFloat(seasonInfo.order).toLocaleString();
-                    else return 0;
-                },
-                footer: info => info.column.id,
-                id: season.name + "Order",
-            }),
-            columnHelper.accessor("wholeSeason", {
-                header: season.name + " Delta",
-                cell: (info) => {
-                    const seasonInfo = info.getValue().find((s) => s.season.name === season.name)
-                    if(seasonInfo)
-                        return parseFloat(seasonInfo.order-seasonInfo.budget).toLocaleString();
-                    else return 0;
-                },
-                footer: info => info.column.id,
-                id: season.name + "diff",
-            })
-        ]
-    })
 
-    columns.push(...seasonColumns.flat());
-    const table = useReactTable({
-        data,
-        columns,
-        getCoreRowModel: getCoreRowModel(),
-    });
-    return (
-        <div className="customers">
-            <h1>Customers By Brand</h1>
-            <div className="select-brand">
-                <label htmlFor="brand">Select Brand</label>
-                <select name="brand" id="brand" onChange={selectBrand}>
-                    <option value="">Select Brand</option>
-                    {brands.map((brand) => (
-                        <option key={brand.id} value={brand.id}>{brand.name}</option>
-                    ))}
-                </select>
-            </div>
-            <div className="table-wrapper">
-                <table>
-                    <thead>
-                    {table.getHeaderGroups().map((headerGroup) => (
-                        <tr key={headerGroup.id}>
-                            {headerGroup.headers.map(header => (
-                                <th key={header.id}>
-                                    {header.isPlaceholder
-                                        ? null
-                                        : flexRender(
-                                            header.column.columnDef.header,
-                                            header.getContext()
-                                        )}
-                                </th>
-                            ))}
-                        </tr>
-                    ))}
-                    </thead>
-                    <tbody>
-                    {table.getRowModel().rows.map(row => (
-                        <tr key={row.id}>
-                            {row.getVisibleCells().map(cell => (
-                                <td key={cell.id}>
-                                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                                </td>
-                            ))}
-                        </tr>
-                    ))}
-                    </tbody>
-                </table>
-            </div>
-        </div>
+    useEffect(() => {
+        function changeColumns() {
+            const initialColumns  = [
+                columnHelper.accessor("customer", {
+                    header: "Customer",
+                    cell: (info) => info.getValue().name,
+                    footer: info => info.column.id,
+                    id: "customer"
+                }),
+                columnHelper.accessor("customer", {
+                    header: "City",
+                    cell: (info) => info.getValue().city,
+                    footer: info => info.column.id,
+                    id: "city"
+                }),
+                columnHelper.accessor("customer", {
+                    header: "Country",
+                    cell: (info) => info.getValue().country,
+                    footer: info => info.column.id,
+                    id: "country"
+                }),
+                columnHelper.accessor("wholeSeason", {
+                    header: "All Orders",
+                    cell: (info) => info.getValue().reduce((acc, curr) => parseFloat(curr.order.toString()) + parseFloat(acc.toString()),0).toLocaleString() + " " + selectedBrand?.currency,
+                    footer: info => info.column.id,
+                    id: "allOrders"
+                })
+            ];
+
+            const seasonColumns = seasons.map((season) => {
+                if (seasons.indexOf(season) >= selectedSeasons.firstIndex && seasons.indexOf(season) <= selectedSeasons.lastIndex) {
+                    console.log(season.name);
+                    return [
+                        columnHelper.accessor("wholeSeason", {
+                            header: season.name + " Budget",
+                            cell: (info) => {
+                                const seasonInfo = info.getValue().find((s) => s.season.name === season.name)
+                                if (seasonInfo)
+                                    return parseFloat(seasonInfo.budget.toString()).toLocaleString() + " " + selectedBrand?.currency;
+                                else return 0;
+                            },
+                            footer: info => info.column.id,
+                            id: season.name + "Budget",
+                        }),
+                        columnHelper.accessor("wholeSeason", {
+                            header: season.name + " Order",
+                            cell: (info) => {
+                                const seasonInfo = info.getValue().find((s) => s.season.name === season.name)
+                                if (seasonInfo)
+                                    return parseFloat(seasonInfo.order.toString()).toLocaleString() + " " + selectedBrand?.currency;
+                                else return 0;
+                            },
+                            footer: info => info.column.id,
+                            id: season.name + "Order",
+                        }),
+                        columnHelper.accessor("wholeSeason", {
+                            header: season.name + " Delta",
+                            cell: (info) => {
+                                const seasonInfo = info.getValue().find((s) => s.season.name === season.name)
+                                if (seasonInfo)
+                                    return parseFloat((seasonInfo.order - seasonInfo.budget).toString()).toLocaleString();
+                                else return 0;
+                            },
+                            footer: info => info.column.id,
+                            id: season.name + "diff",
+                        })
+                    ]
+                } else return [];
+            });
+
+            setColumns([...initialColumns, ...seasonColumns.flat()]);
+
+        }
+        changeColumns();
+    }, [selectedSeasons])
+
+
+
+    function selectFirstSeason(event:React.ChangeEvent){
+        event.preventDefault();
+        const target = event.target as HTMLSelectElement;
+        const season = seasons.find((season) => season.id === target.value);
+        if(season){
+            setSelectedSeasons({... selectedSeasons,firstIndex:seasons.findIndex((s) => s.id === season.id)});
+        }
+    }
+    function selectLastSeason(event:React.ChangeEvent){
+        event.preventDefault();
+        const target = event.target as HTMLSelectElement;
+        const season = seasons.find((season) => season.id === target.value);
+        if(season){
+            setSelectedSeasons({... selectedSeasons, lastIndex:seasons.findIndex((s) => s.id === season.id)});
+        }
+    }
+
+    const table = useReactTable(
+        {
+            columns: columns,
+            data: data,
+            getCoreRowModel: getCoreRowModel(),
+        }
     );
+
+    return <div className="customers">
+        <h1>Customers By Brand</h1>
+        <div className="select-brand">
+            <label htmlFor="brand"></label>
+            <select name="brand" id="brand" onChange={selectBrand}>
+                <option value="">Select Brand</option>
+                {brands.map((brand) => <option key={brand.id} value={brand.id}>{brand.name}</option>)}
+            </select>
+        </div>
+        <div className="select-brand">
+            <label htmlFor="firstSeason"></label>
+            <select name="firstSeason" id="firstSeason" onChange={selectFirstSeason}>
+                <option value="">From Season</option>
+                {
+                   seasons.map((season) => <option key={season.id} value={season.id}>{season.name}</option>)
+                }
+            </select>
+        </div>
+        <div className="select-brand">
+            <label htmlFor="secondSeason"></label>
+            <select name="secondSeason" id="secondSeason" onChange={selectLastSeason}>
+                <option value="">To Season</option>
+                {
+                    seasons.map((season) =>
+                        <option key={season.id} value={season.id}>{season.name}</option>
+                    )
+                }
+            </select>
+        </div>
+        <div className="table-wrapper"> {table &&
+            <table>
+                <thead>
+                {table.getHeaderGroups().map((headerGroup) => <tr key={headerGroup.id}>
+                        {headerGroup.headers.map(header => (
+                            <th key={header.id}>
+                                {header.isPlaceholder
+                                    ? null
+                                    : flexRender(
+                                        header.column.columnDef.header,
+                                        header.getContext()
+                                    )}
+                            </th>
+                        ))}
+                    </tr>)}
+                </thead>
+                <tbody>
+                {table.getRowModel().rows.map(row => <tr key={row.id}>
+                        {row.getVisibleCells().map(cell => (
+                            <td key={cell.id}>
+                                {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                            </td>
+                        ))}
+                    </tr>)}
+                </tbody>
+            </table>
+        }
+        </div>
+    </div>;
 }

@@ -78,8 +78,8 @@ export function ChangeCustomer({customer, setChangeCustomer}: { customer: Custom
     }
 
     return (
-        <Draggable>
-            <form onSubmit={submitty} className="form-box">
+        <Draggable positionOffset={{ x: '-50%', y: '-50%' }} >
+            <form onSubmit={submitty} className="form-box-window" >
                 <button className="close-button" onClick={closePopUp}>
                     X
                 </button>
