@@ -46,6 +46,7 @@ export function CustomersByBrand() {
     const [seasons, setSeasons] = useState<Season[]>([]);
     const [selectedSeasons, setSelectedSeasons] = useState<{firstIndex:number,lastIndex:number}>({firstIndex:0,lastIndex:0});
     const [data, setData] = useState<{ customer:Customer,wholeSeason:{season:Season,budget:number,order:number}[]}[]>([]);
+    const [showDelta, setShowDelta] = useState<boolean>(false);
     const [columns, setColumns] = useState([
         columnHelper.accessor("customer", {
             header: "Customer",
@@ -251,7 +252,7 @@ export function CustomersByBrand() {
             const seasonColumns = seasons.map((season) => {
                 if (seasons.indexOf(season) >= selectedSeasons.firstIndex && seasons.indexOf(season) <= selectedSeasons.lastIndex) {
                     console.log(season.name);
-                    return [
+                    const extraColumns = [
                         columnHelper.accessor("wholeSeason", {
                             header: season.name + " Budget",
                             cell: (info) => {
@@ -273,7 +274,10 @@ export function CustomersByBrand() {
                             },
                             footer: info => info.column.id,
                             id: season.name + "Order",
-                        }),
+                        })
+                    ];
+                    if(showDelta){
+                        extraColumns.push(
                         columnHelper.accessor("wholeSeason", {
                             header: season.name + " Delta",
                             cell: (info) => {
@@ -284,8 +288,9 @@ export function CustomersByBrand() {
                             },
                             footer: info => info.column.id,
                             id: season.name + "diff",
-                        })
-                    ]
+                        }));
+                    }
+                    return extraColumns;
                 } else return [];
             });
 
@@ -293,7 +298,7 @@ export function CustomersByBrand() {
 
         }
         changeColumns();
-    }, [selectedSeasons])
+    }, [selectedSeasons,showDelta])
 
 
 
@@ -321,6 +326,13 @@ export function CustomersByBrand() {
             getCoreRowModel: getCoreRowModel(),
         }
     );
+
+
+
+    function clickShowDelta(event:React.FormEvent){
+        event.preventDefault();
+        setShowDelta(!showDelta);
+    }
 
     return <div className="customers">
         <h1>Customers By Brand</h1>
@@ -351,6 +363,12 @@ export function CustomersByBrand() {
                         )
                     }
                 </select>
+            </div>
+            <div className="selection">
+                <label htmlFor="showDelta">
+                    Show Delta
+                    <input name="showDelta" id="showDelta" type="checkbox" checked={showDelta} onInput={clickShowDelta}/>
+                </label>
             </div>
         </div>
         <div className="table-wrapper"> {table &&
