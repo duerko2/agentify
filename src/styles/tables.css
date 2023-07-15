@@ -29,3 +29,18 @@ tbody tr:hover {
     background-color: #e6e6e6;
     cursor: pointer;
 }
+
+.selection-wrapper{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    padding: 10px;
+    margin : 10px;
+}
+.selection{
+    padding: 10px;
+}
+.selection select{
+    border-radius: 5px;
+    border: 1px solid lightgray;
+}

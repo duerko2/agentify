@@ -324,32 +324,34 @@ export function CustomersByBrand() {
 
     return <div className="customers">
         <h1>Customers By Brand</h1>
-        <div className="select-brand">
-            <label htmlFor="brand"></label>
-            <select name="brand" id="brand" onChange={selectBrand}>
-                <option value="">Select Brand</option>
-                {brands.map((brand) => <option key={brand.id} value={brand.id}>{brand.name}</option>)}
-            </select>
-        </div>
-        <div className="select-brand">
-            <label htmlFor="firstSeason"></label>
-            <select name="firstSeason" id="firstSeason" onChange={selectFirstSeason}>
-                <option value="">From Season</option>
-                {
-                   seasons.map((season) => <option key={season.id} value={season.id}>{season.name}</option>)
-                }
-            </select>
-        </div>
-        <div className="select-brand">
-            <label htmlFor="secondSeason"></label>
-            <select name="secondSeason" id="secondSeason" onChange={selectLastSeason}>
-                <option value="">To Season</option>
-                {
-                    seasons.map((season) =>
-                        <option key={season.id} value={season.id}>{season.name}</option>
-                    )
-                }
-            </select>
+        <div className="selection-wrapper">
+            <div className="selection">
+                <label htmlFor="brand"></label>
+                <select name="brand" id="brand" onChange={selectBrand}>
+                    <option value="">Select Brand</option>
+                    {brands.map((brand) => <option key={brand.id} value={brand.id}>{brand.name}</option>)}
+                </select>
+            </div>
+            <div className="selection">
+                <label htmlFor="firstSeason"></label>
+                <select name="firstSeason" id="firstSeason" onChange={selectFirstSeason}>
+                    <option value="">From Season</option>
+                    {
+                       seasons.map((season) => <option key={season.id} value={season.id}>{season.name}</option>)
+                    }
+                </select>
+            </div>
+            <div className="selection">
+                <label htmlFor="secondSeason"></label>
+                <select name="secondSeason" id="secondSeason" onChange={selectLastSeason}>
+                    <option value="">To Season</option>
+                    {
+                        seasons.map((season) =>
+                            <option key={season.id} value={season.id}>{season.name}</option>
+                        )
+                    }
+                </select>
+            </div>
         </div>
         <div className="table-wrapper"> {table &&
             <table>
