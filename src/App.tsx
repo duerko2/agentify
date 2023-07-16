@@ -9,8 +9,7 @@ import TopBar from "./routing/TopBar";
 import CustomerPage from "./pages/customerPage/CustomerPage";
 import BrandPage from "./pages/brandPage/BrandPage";
 import OrderPage from "./pages/orderPage/OrderPage";
-
-
+import FrontPage from "./pages/frontPage/FrontPage";
 
 
 function App() {
@@ -71,6 +70,7 @@ function App() {
             page==="frontpage" &&
             <div>
                 <h1>you are logged in</h1>
+                <FrontPage/>
             </div> ||
             page==="customers" &&
             <div>
