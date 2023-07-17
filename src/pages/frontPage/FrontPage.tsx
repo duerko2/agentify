@@ -75,6 +75,7 @@ function FrontPage() {
                 return a.date.getTime() - b.date.getTime();
             });
             setSeasons(seasons);
+            setSelectedSeason(seasons.length-1);
         }
         if(auth.currentUser){
             getBrands();
@@ -92,7 +93,7 @@ function FrontPage() {
     useEffect(() => {
         async function getOrders() {
             if(selectedSeason!=-1) {
-                console.log(seasons[selectedSeason].id);
+                console.log(doc(db, "season", seasons[selectedSeason].id));
                 const orderQuery = query(collection(db, "order"), where("uid", "==", auth.currentUser?.uid), where("season", "==", doc(db, "season", seasons[selectedSeason].id)));
                 const orderData = await getDocs(orderQuery);
                 const orders: Order[] = orderData.docs.map((doc) => {
@@ -105,6 +106,9 @@ function FrontPage() {
                         uid: doc.data().uid,
                         id: doc.id,
                     } as Order
+                });
+                orders.forEach((order) => {
+                    console.log(order.amount);
                 });
                 setOrders(orders);
                 const budgetQuery = query(collection(db, "budget"), where("uid", "==", auth.currentUser?.uid), where("season", "==", doc(db, "season", seasons[selectedSeason].id)));
@@ -123,23 +127,29 @@ function FrontPage() {
                 setBudgets(budgets);
             }
         }
-        function putData(){
-            if(selectedSeason===-1) {
-                return;
-            }
-            const data : {brand:Brand,orderTotal:number,budgetTotal:number}[] = [];
-            for(let i = 0; i < brands.length; i++){
-                const brand = brands[i];
-                const orderTotal = orders.filter((order) => order.brand.id === brand.id).reduce((a,b) => a + b.amount, 0);
-                const budgetTotal = budgets.filter((budget) => budget.brand.id === brand.id).reduce((a,b) => a + b.amount, 0);
-                data.push({brand:brand,orderTotal:orderTotal,budgetTotal:budgetTotal});
-            }
-            setData(data);
-        }
+
         if(auth.currentUser){
-            getOrders().then(putData);
+            getOrders();
         }
     }, [selectedSeason]);
+
+    useEffect(
+        () => {
+            function putData(){
+                if(selectedSeason===-1) {
+                    return;
+                }
+                const data : {brand:Brand,orderTotal:number,budgetTotal:number}[] = [];
+                for(let i = 0; i < brands.length; i++){
+                    const brand = brands[i];
+                    const orderTotal = orders.filter((order) => order.brand.id === brand.id).reduce((a,b) => a + b.amount, 0);
+                    const budgetTotal = budgets.filter((budget) => budget.brand.id === brand.id).reduce((a,b) => a + b.amount, 0);
+                    data.push({brand:brand,orderTotal:orderTotal,budgetTotal:budgetTotal});
+                }
+                setData(data);
+            }
+            putData();
+        },[orders,budgets]);
 
     function selectSeason(event: React.ChangeEvent<HTMLSelectElement>) {
         event.preventDefault();
@@ -179,8 +189,14 @@ function FrontPage() {
             id: "commission"
         }),
         columnHelper.accessor("brand", {
-            header: "Total Commission",
-            cell: (info) => (info.getValue().commission * info.row.original.orderTotal).toLocaleString(),
+            header: "Budgeted Commission",
+            cell: (info) => (info.getValue().commission * info.row.original.budgetTotal*0.01).toLocaleString(),
+            footer: info => info.column.id,
+            id: "totalCommission"
+        }),
+        columnHelper.accessor("brand", {
+            header: "Expected Commission",
+            cell: (info) => (info.getValue().commission * info.row.original.orderTotal*0.01).toLocaleString(),
             footer: info => info.column.id,
             id: "totalCommission"
         }),
