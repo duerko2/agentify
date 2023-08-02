@@ -3,6 +3,7 @@ import React, {useEffect, useState} from "react";
 import {auth, db} from "../../firebase/firebase";
 import {onAuthStateChanged} from "firebase/auth";
 import {createColumnHelper, flexRender, getCoreRowModel, useReactTable} from "@tanstack/react-table";
+import {currencyConverter} from "../../currencies/CurrencyConverter";
 
 type Order = {
     amount:number;
@@ -88,6 +89,8 @@ function FrontPage() {
                 getSeasons();
             }
         });
+
+        currencyConverter( "EUR", ["USD","CAD"]);
     }, []);
 
     useEffect(() => {
@@ -226,6 +229,7 @@ function FrontPage() {
 
          */
     ];
+
     const table = useReactTable(
         {
             columns: columns,
