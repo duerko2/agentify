@@ -3,7 +3,7 @@ import React, {useEffect, useState} from "react";
 import {auth, db} from "../../firebase/firebase";
 import {onAuthStateChanged} from "firebase/auth";
 import {createColumnHelper, flexRender, getCoreRowModel, useReactTable} from "@tanstack/react-table";
-import {currencyConverter} from "../../currencies/CurrencyConverter";
+import {currencyConverter, getCurrencies} from "../../currencies/CurrencyConverter";
 
 type Order = {
     amount:number;
@@ -46,6 +46,9 @@ function FrontPage() {
     const [budgets, setBudgets] = useState<Order[]>([]);
     const [seasons, setSeasons] = useState<Season[]>([]);
     const [selectedSeason, setSelectedSeason] = useState<number>(-1);
+    const [selectedCurrency, setSelectedCurrency] = useState<string>("EUR");
+    const [conversions, setConversions] = useState<{[key:string]:number}>({});
+    const [availableCurrencies, setAvailableCurrencies] = useState<string[]>([]);
     const [data, setData] = useState<{brand:Brand,orderTotal:number,budgetTotal:number}[]>([]);
 
     useEffect(() => {
@@ -78,20 +81,29 @@ function FrontPage() {
             setSeasons(seasons);
             setSelectedSeason(seasons.length-1);
         }
+        async function getCurrenciesInformation(){
+            setAvailableCurrencies(await getCurrencies());
+        }
         if(auth.currentUser){
-            getBrands();
+            getBrands().then(getCurrenciesInformation);
             getSeasons();
         }
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
-                getBrands();
+                getBrands().then(getCurrenciesInformation);
                 getSeasons();
             }
         });
 
-        currencyConverter( "EUR", ["USD","CAD"]);
+
     }, []);
+    useEffect(() => {
+        async function getConv(){
+            setConversions( (await currencyConverter(selectedCurrency,brands.map((brand)=>brand.currency))).data);
+        }
+        getConv();
+    }, [selectedCurrency]);
 
     useEffect(() => {
         async function getOrders() {
@@ -154,80 +166,51 @@ function FrontPage() {
             putData();
         },[orders,budgets]);
 
-    function selectSeason(event: React.ChangeEvent<HTMLSelectElement>) {
-        event.preventDefault();
-        const index = seasons.findIndex((season) => season.id === event.target.value);
-        setSelectedSeason(index);
-    }
+
 
     const columns  = [
         columnHelper.accessor("brand", {
             header: "Brand",
             cell: (info) => info.getValue().name,
-            footer: info => info.column.id,
+            footer: "TOTAL",
             id: "brand"
         }),
         columnHelper.accessor("budgetTotal", {
             header: "Total Budget",
             cell: (info) => info.getValue().toLocaleString(),
-            footer: info => info.column.id,
+            footer: data.reduce((a,b) => a + b.budgetTotal/conversions[b.brand.currency], 0).toLocaleString(),
             id: "budget"
         }),
         columnHelper.accessor("orderTotal", {
             header: "Total Orders",
             cell: (info) => info.getValue().toLocaleString(),
-            footer: info => info.column.id,
+            footer: data.reduce((a,b) => a + b.orderTotal/conversions[b.brand.currency], 0).toLocaleString(),
             id: "orders"
         }),
         columnHelper.accessor("brand", {
             header: "Currency",
             cell: (info) => info.getValue().currency,
-            footer: info => info.column.id,
+            footer: selectedCurrency,
             id: "currency"
         }),
         columnHelper.accessor("brand", {
             header: "Commission",
             cell: (info) => info.getValue().commission+"%",
-            footer: info => info.column.id,
+            footer: "",
             id: "commission"
         }),
         columnHelper.accessor("brand", {
             header: "Budgeted Commission",
             cell: (info) => (info.getValue().commission * info.row.original.budgetTotal*0.01).toLocaleString(),
-            footer: info => info.column.id,
-            id: "totalCommission"
+            footer: info => data.reduce((a,b) => a + b.budgetTotal*b.brand.commission*0.01/conversions[b.brand.currency], 0).toLocaleString(),
+            id: "budgetCommission"
         }),
         columnHelper.accessor("brand", {
             header: "Expected Commission",
             cell: (info) => (info.getValue().commission * info.row.original.orderTotal*0.01).toLocaleString(),
-            footer: info => info.column.id,
-            id: "totalCommission"
-        }),
-
-
-
-
-        /*
-        columnHelper.accessor("customer", {
-            header: "City",
-            cell: (info) => info.getValue().city,
-            footer: info => info.column.id,
-            id: "city"
-        }),
-        columnHelper.accessor("customer", {
-            header: "Country",
-            cell: (info) => info.getValue().country,
-            footer: info => info.column.id,
-            id: "country"
-        }),
-        columnHelper.accessor("wholeSeason", {
-            header: "All Orders",
-            cell: (info) => info.getValue().reduce((acc, curr) => parseFloat(curr.order.toString()) + parseFloat(acc.toString()),0).toLocaleString() + " " + selectedBrand?.currency,
-            footer: info => info.column.id,
-            id: "allOrders"
+            footer: info => data.reduce((a,b) => a + b.orderTotal*b.brand.commission*0.01/conversions[b.brand.currency], 0).toLocaleString(),
+            id: "expCommission"
         })
-
-         */
     ];
 
     const table = useReactTable(
@@ -237,6 +220,16 @@ function FrontPage() {
             getCoreRowModel: getCoreRowModel(),
         }
     );
+
+    function selectCurrency(event: React.ChangeEvent<HTMLSelectElement>) {
+        event.preventDefault();
+        setSelectedCurrency(event.target.value);
+    }
+    function selectSeason(event: React.ChangeEvent<HTMLSelectElement>) {
+        event.preventDefault();
+        const index = seasons.findIndex((season) => season.id === event.target.value);
+        setSelectedSeason(index);
+    }
 
     return (
         <div>
@@ -248,6 +241,17 @@ function FrontPage() {
                         {
                             seasons.map((season) =>
                                 <option key={season.id} value={season.id}>{season.name}</option>
+                            )
+                        }
+                    </select>
+                </div>
+                <div className="selection">
+                    <label htmlFor="currency"></label>
+                    <select name="currency" id="currency" onChange={selectCurrency}>
+                        <option value="EUR">Currency</option>
+                        {
+                            availableCurrencies.map((currency) =>
+                                <option key={currency} value={currency}>{currency}</option>
                             )
                         }
                     </select>
@@ -278,6 +282,18 @@ function FrontPage() {
                         ))}
                     </tr>)}
                     </tbody>
+                    <tfoot>
+                    {table.getFooterGroups().map((footerGroup) => <tr key={footerGroup.id}>
+                        {footerGroup.headers.map(header => (
+                            <td key={header.id}>
+                                {flexRender(
+                                    header.column.columnDef.footer,
+                                    header.getContext()
+                                )}
+                            </td>
+                        ))}
+                    </tr>)}
+                    </tfoot>
                 </table>
             </div>
         </div>

@@ -1,5 +1,5 @@
-// : {endCurrency: string, amount: number}[]
-export async function currencyConverter(baseCurrency: string, endCurrencies: string[]) {
+//
+export async function currencyConverter(baseCurrency: string, endCurrencies: string[]) : Promise<{data: {[p: string]: number}}>{
     const key = "fca_live_sGOkGPrwH5VAFrX6ANwBI7kdzMtrpNTL1QAxGMqu";
 
     const BASE_URL = "https://api.freecurrencyapi.com/v1/latest";
@@ -13,7 +13,6 @@ export async function currencyConverter(baseCurrency: string, endCurrencies: str
     }
     const url = BASE_URL.concat("?apikey=", params.apike, "&currencies=", params.currencies.join("%2C"), "&base_currency=", params.base_currency);
 
-    console.log(url);
     try {
         const response = await fetch(url, {
             method: "GET",
@@ -26,7 +25,44 @@ export async function currencyConverter(baseCurrency: string, endCurrencies: str
             }};
 
         console.log(data);
+        return data;
+
     } catch (error) {
         console.log(error);
+        return {data: {}};
     }
+}
+export async function getCurrencies() : Promise<string[]>{
+
+
+    const URL = "https://api.freecurrencyapi.com/v1/currencies?apikey=fca_live_sGOkGPrwH5VAFrX6ANwBI7kdzMtrpNTL1QAxGMqu&currencies="
+
+    try {
+        const response = await fetch(URL, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+            },
+        });
+        const data = await response.json() as {
+            data:{
+                [key: string]:
+                    {
+                        symbol: string,
+                        name: string,
+                        symbol_native: string,
+                        decimal_digits: number,
+                        rounding: number,
+                        code: string,
+                        name_plural: string
+                    }
+            }
+        };
+        console.log(data);
+        return Object.keys(data.data);
+    } catch (error) {
+        console.log(error);
+        return [];
+    }
+
 }
