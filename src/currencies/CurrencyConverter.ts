@@ -24,7 +24,6 @@ export async function currencyConverter(baseCurrency: string, endCurrencies: str
             [key: string]: number
             }};
 
-        console.log(data);
         return data;
 
     } catch (error) {
@@ -58,7 +57,6 @@ export async function getCurrencies() : Promise<string[]>{
                     }
             }
         };
-        console.log(data);
         return Object.keys(data.data);
     } catch (error) {
         console.log(error);

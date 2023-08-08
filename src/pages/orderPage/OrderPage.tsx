@@ -4,10 +4,11 @@ import AddBrand from "../../forms/AddBrand";
 import {BrandTable} from "../brandPage/BrandTable";
 import AddOrder from "../../forms/AddOrder";
 import {OrderTable} from "./OrderTable";
+import EditableOrderTable from "./EditableOrderTable";
 
 
 function BrandPage(){
-    const tabs = ["Orders", "New Order"];
+    const tabs = ["Orders", "Set Orders", "New Order"];
     const [selectedTab, setSelectedTab] = useState<string>("Orders");
     const [reactComp, setReactComp] = useState<JSX.Element>(<></>);
 
@@ -16,6 +17,8 @@ function BrandPage(){
             setReactComp(<OrderTable/>);
         } else if(selectedTab === "New Order"){
             setReactComp(<AddOrder/>);
+        } else if (selectedTab ==="Set Orders"){
+            setReactComp(<EditableOrderTable/>);
         }}, [selectedTab]
     );
 

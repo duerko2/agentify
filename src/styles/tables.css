@@ -10,7 +10,7 @@ table {
 th {
     border-bottom: 1px solid lightgray;
     border-right: 1px solid lightgray;
-    padding: 2px 4px;
+    padding: 2px 12px;
 }
 tbody tr:nth-child(odd) {
     background-color: #f2f2f2;

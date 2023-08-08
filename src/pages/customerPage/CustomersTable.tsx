@@ -63,6 +63,7 @@ export function CustomersTable() {
             header: 'Name',
             cell: info => info.getValue(),
             footer: info => info.column.id,
+            size:250,
         }),
         columnHelper.accessor('address', {
             header: 'Address',
@@ -83,12 +84,18 @@ export function CustomersTable() {
             header: 'Brands',
             cell: info => info.getValue()?.map((brand: CustomerBrand) => brand.name).join(", "),
             footer: info => info.column.id,
+            size:2500,
         }),
     ];
     const table = useReactTable({
         data,
         columns,
         getCoreRowModel: getCoreRowModel(),
+        defaultColumn: {
+            minSize: 0,
+            size: Number.MAX_SAFE_INTEGER,
+            maxSize: Number.MAX_SAFE_INTEGER,
+        }
     });
 
     function customerClick(customer:Customer) {
@@ -105,7 +112,7 @@ export function CustomersTable() {
                     {table.getHeaderGroups().map((headerGroup) => (
                         <tr key={headerGroup.id}>
                             {headerGroup.headers.map(header => (
-                                <th key={header.id}>
+                                <th style={{width: header.getSize() === Number.MAX_SAFE_INTEGER ? "auto" : header.getSize()}} key={header.id}>
                                     {header.isPlaceholder
                                         ? null
                                         : flexRender(

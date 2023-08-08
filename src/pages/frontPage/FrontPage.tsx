@@ -4,6 +4,7 @@ import {auth, db} from "../../firebase/firebase";
 import {onAuthStateChanged} from "firebase/auth";
 import {createColumnHelper, flexRender, getCoreRowModel, useReactTable} from "@tanstack/react-table";
 import {currencyConverter, getCurrencies} from "../../currencies/CurrencyConverter";
+import OverviewTable from "./OverviewTable";
 
 type Order = {
     amount:number;
@@ -38,18 +39,21 @@ type Season = {
 }
 
 
-const columnHelper = createColumnHelper<{brand:Brand,orderTotal:number,budgetTotal:number}>();
+const columnHelper = createColumnHelper<{brand:Brand,orderTotal:number,budgetTotal:number,reorderTotal:number, reorderBudgetTotal:number}>();
 
 function FrontPage() {
     const [brands, setBrands] = useState<Brand[]>([]);
     const [orders, setOrders] = useState<Order[]>([]);
+    const [reorders, setReorders] = useState<Order[]>([]);
     const [budgets, setBudgets] = useState<Order[]>([]);
+    const [reorderBudgets, setReorderBudgets] = useState<Order[]>([]);
     const [seasons, setSeasons] = useState<Season[]>([]);
     const [selectedSeason, setSelectedSeason] = useState<number>(-1);
     const [selectedCurrency, setSelectedCurrency] = useState<string>("EUR");
     const [conversions, setConversions] = useState<{[key:string]:number}>({});
     const [availableCurrencies, setAvailableCurrencies] = useState<string[]>([]);
-    const [data, setData] = useState<{brand:Brand,orderTotal:number,budgetTotal:number}[]>([]);
+    const [data, setData] = useState<{brand:Brand,orderTotal:number,budgetTotal:number,reorderTotal:number, reorderBudgetTotal:number}[]>([]);
+    const [top5Customers, setTop5Customers] = useState<{customer: Customer, commission: number}[]>([]);
 
     useEffect(() => {
         async function getBrands() {
@@ -108,7 +112,6 @@ function FrontPage() {
     useEffect(() => {
         async function getOrders() {
             if(selectedSeason!=-1) {
-                console.log(doc(db, "season", seasons[selectedSeason].id));
                 const orderQuery = query(collection(db, "order"), where("uid", "==", auth.currentUser?.uid), where("season", "==", doc(db, "season", seasons[selectedSeason].id)));
                 const orderData = await getDocs(orderQuery);
                 const orders: Order[] = orderData.docs.map((doc) => {
@@ -122,10 +125,44 @@ function FrontPage() {
                         id: doc.id,
                     } as Order
                 });
-                orders.forEach((order) => {
-                    console.log(order.amount);
+                setOrders(orders.filter((order) => order.type === "prebook"));
+                setReorders(orders.filter((order) => order.type === "reorder"));
+
+                // top 5 customers by order amount
+                const customerQuery = query(collection(db, "customer"), where("uid", "==", auth.currentUser?.uid));
+                const customerData = await getDocs(customerQuery);
+                const customers: Customer[] = customerData.docs.map((doc) => {
+                    return {
+                        name: doc.data().name,
+                        address: doc.data().address,
+                        city: doc.data().city,
+                        country: doc.data().country,
+                        brands: doc.data().brands,
+                        uid: doc.data().uid,
+                        id: doc.id,
+                    } as Customer
                 });
-                setOrders(orders);
+                const top5Customers : {customer: Customer, commission: number}[] = [];
+                customers.forEach((customer) => {
+                    let commission = 0;
+                    orders.forEach((order) => {
+                        if(order.customer.id === customer.id){
+
+                            const currency = brands.find((brand) => brand.id === order.brand.id)?.currency;
+                            const conversion = conversions[currency||"EUR"];
+                            const brand = brands.find((brand) => brand.id === order.brand.id);
+                            if(brand){
+                                commission += order.amount * brand.commission*0.01 / conversion;
+                            }
+                        }
+                    });
+                    top5Customers.push({customer: customer, commission: commission});
+                });
+                top5Customers.sort((a,b) => {
+                    return b.commission - a.commission;
+                });
+                setTop5Customers(top5Customers.slice(0,5));
+
                 const budgetQuery = query(collection(db, "budget"), where("uid", "==", auth.currentUser?.uid), where("season", "==", doc(db, "season", seasons[selectedSeason].id)));
                 const budgetData = await getDocs(budgetQuery);
                 const budgets: Order[] = budgetData.docs.map((doc) => {
@@ -139,7 +176,8 @@ function FrontPage() {
                         id: doc.id,
                     } as Order
                 });
-                setBudgets(budgets);
+                setBudgets(budgets.filter((budget) => budget.type === "prebook"));
+                setReorderBudgets(budgets.filter((budget) => budget.type === "reorder"));
             }
         }
 
@@ -154,12 +192,14 @@ function FrontPage() {
                 if(selectedSeason===-1) {
                     return;
                 }
-                const data : {brand:Brand,orderTotal:number,budgetTotal:number}[] = [];
+                const data : {brand:Brand,orderTotal:number,budgetTotal:number,reorderTotal:number, reorderBudgetTotal:number}[] = [];
                 for(let i = 0; i < brands.length; i++){
                     const brand = brands[i];
                     const orderTotal = orders.filter((order) => order.brand.id === brand.id).reduce((a,b) => a + b.amount, 0);
                     const budgetTotal = budgets.filter((budget) => budget.brand.id === brand.id).reduce((a,b) => a + b.amount, 0);
-                    data.push({brand:brand,orderTotal:orderTotal,budgetTotal:budgetTotal});
+                    const reorderTotal = reorders.filter((order) => order.brand.id === brand.id).reduce((a,b) => a + b.amount, 0);
+                    const reorderBudgetTotal = reorderBudgets.filter((budget) => budget.brand.id === brand.id).reduce((a,b) => a + b.amount, 0);
+                    data.push({brand:brand,orderTotal:orderTotal,budgetTotal:budgetTotal, reorderTotal:reorderTotal, reorderBudgetTotal:reorderBudgetTotal});
                 }
                 setData(data);
             }
@@ -168,7 +208,7 @@ function FrontPage() {
 
 
 
-    const columns  = [
+    const columnsPreOrder  = [
         columnHelper.accessor("brand", {
             header: "Brand",
             cell: (info) => info.getValue().name,
@@ -176,16 +216,28 @@ function FrontPage() {
             id: "brand"
         }),
         columnHelper.accessor("budgetTotal", {
-            header: "Total Budget",
+            header: "Budget",
             cell: (info) => info.getValue().toLocaleString(),
             footer: data.reduce((a,b) => a + b.budgetTotal/conversions[b.brand.currency], 0).toLocaleString(),
             id: "budget"
         }),
         columnHelper.accessor("orderTotal", {
-            header: "Total Orders",
+            header: "Orders",
             cell: (info) => info.getValue().toLocaleString(),
             footer: data.reduce((a,b) => a + b.orderTotal/conversions[b.brand.currency], 0).toLocaleString(),
             id: "orders"
+        }),
+        columnHelper.accessor("brand", {
+            header: "Difference",
+            cell: (info) => (info.row.original.orderTotal - info.row.original.budgetTotal).toLocaleString(),
+            footer: data.reduce((a,b) => a + (b.orderTotal - b.budgetTotal)/conversions[b.brand.currency], 0).toLocaleString(),
+            id: "difference"
+        }),
+        columnHelper.accessor("brand", {
+            header: "% of Budget",
+            cell: (info) => (((info.row.original.orderTotal - info.row.original.budgetTotal)/info.row.original.budgetTotal*100)|0).toLocaleString()+"%",
+            footer: ((data.reduce((a,b) => a + (b.orderTotal - b.budgetTotal)/conversions[b.brand.currency], 0)/data.reduce((a,b) => a + b.budgetTotal/conversions[b.brand.currency], 0)*100)|0).toLocaleString()+"%",
+            id: "differencePercent"
         }),
         columnHelper.accessor("brand", {
             header: "Currency",
@@ -210,12 +262,101 @@ function FrontPage() {
             cell: (info) => (info.getValue().commission * info.row.original.orderTotal*0.01).toLocaleString(),
             footer: info => data.reduce((a,b) => a + b.orderTotal*b.brand.commission*0.01/conversions[b.brand.currency], 0).toLocaleString(),
             id: "expCommission"
+        }),
+        columnHelper.accessor("brand", {
+            header: "Difference",
+            cell: (info) => ((info.getValue().commission * info.row.original.orderTotal*0.01) - (info.getValue().commission * info.row.original.budgetTotal*0.01)).toLocaleString(),
+            footer: info => (data.reduce((a,b) => a + b.orderTotal*b.brand.commission*0.01/conversions[b.brand.currency], 0) - data.reduce((a,b) => a + b.budgetTotal*b.brand.commission*0.01/conversions[b.brand.currency], 0)).toLocaleString(),
+            id: "commissionDifference"
+        }),
+        columnHelper.accessor("brand", {
+            header: "% of Budget",
+            cell: (info) => ((((info.getValue().commission * info.row.original.orderTotal*0.01) - (info.getValue().commission * info.row.original.budgetTotal*0.01))/(info.getValue().commission * info.row.original.budgetTotal*0.01)*100)|0).toLocaleString()+"%",
+            footer: info => ((((data.reduce((a,b) => a + b.orderTotal*b.brand.commission*0.01/conversions[b.brand.currency], 0) - data.reduce((a,b) => a + b.budgetTotal*b.brand.commission*0.01/conversions[b.brand.currency], 0))/(data.reduce((a,b) => a + b.budgetTotal*b.brand.commission*0.01/conversions[b.brand.currency], 0)))*100)|0).toLocaleString()+"%",
+            id: "commissionDifferencePercent"
         })
     ];
 
-    const table = useReactTable(
+    const columnsReOrder  = [
+        columnHelper.accessor("brand", {
+            header: "Brand",
+            cell: (info) => info.getValue().name,
+            footer: "TOTAL",
+            id: "brand"
+        }),
+        columnHelper.accessor("reorderBudgetTotal", {
+            header: "Budget",
+            cell: (info) => info.getValue().toLocaleString(),
+            footer: data.reduce((a,b) => a + b.reorderBudgetTotal/conversions[b.brand.currency], 0).toLocaleString(),
+            id: "budget"
+        }),
+        columnHelper.accessor("reorderTotal", {
+            header: "Orders",
+            cell: (info) => info.getValue().toLocaleString(),
+            footer: data.reduce((a,b) => a + b.reorderTotal/conversions[b.brand.currency], 0).toLocaleString(),
+            id: "orders"
+        }),
+        columnHelper.accessor("brand", {
+            header: "Difference",
+            cell: (info) => (info.row.original.reorderTotal - info.row.original.reorderBudgetTotal).toLocaleString(),
+            footer: data.reduce((a,b) => a + (b.reorderTotal - b.reorderBudgetTotal)/conversions[b.brand.currency], 0).toLocaleString(),
+            id: "difference"
+        }),
+        columnHelper.accessor("brand", {
+            header: "% of Budget",
+            cell: (info) => (((info.row.original.reorderTotal - info.row.original.reorderBudgetTotal)/info.row.original.reorderBudgetTotal*100)|0).toLocaleString()+"%",
+            footer: ((data.reduce((a,b) => a + (b.reorderTotal - b.reorderBudgetTotal)/conversions[b.brand.currency], 0)/data.reduce((a,b) => a + b.reorderBudgetTotal/conversions[b.brand.currency], 0)*100)|0).toLocaleString()+"%",
+            id: "differencePercent"
+        }),
+        columnHelper.accessor("brand", {
+            header: "Currency",
+            cell: (info) => info.getValue().currency,
+            footer: selectedCurrency,
+            id: "currency"
+        }),
+        columnHelper.accessor("brand", {
+            header: "Commission",
+            cell: (info) => info.getValue().commission+"%",
+            footer: "",
+            id: "commission"
+        }),
+        columnHelper.accessor("brand", {
+            header: "Budgeted Commission",
+            cell: (info) => (info.getValue().commission * info.row.original.reorderBudgetTotal*0.01).toLocaleString(),
+            footer: info => data.reduce((a,b) => a + b.reorderBudgetTotal*b.brand.commission*0.01/conversions[b.brand.currency], 0).toLocaleString(),
+            id: "budgetCommission"
+        }),
+        columnHelper.accessor("brand", {
+            header: "Expected Commission",
+            cell: (info) => (info.getValue().commission * info.row.original.reorderTotal*0.01).toLocaleString(),
+            footer: info => data.reduce((a,b) => a + b.reorderTotal*b.brand.commission*0.01/conversions[b.brand.currency], 0).toLocaleString(),
+            id: "expCommission"
+        }),
+        columnHelper.accessor("brand", {
+            header: "Difference",
+            cell: (info) => ((info.getValue().commission * info.row.original.reorderTotal*0.01) - (info.getValue().commission * info.row.original.reorderBudgetTotal*0.01)).toLocaleString(),
+            footer: info => (data.reduce((a,b) => a + b.reorderTotal*b.brand.commission*0.01/conversions[b.brand.currency], 0) - data.reduce((a,b) => a + b.reorderBudgetTotal*b.brand.commission*0.01/conversions[b.brand.currency], 0)).toLocaleString(),
+            id: "commissionDifference"
+        }),
+        columnHelper.accessor("brand", {
+            header: "% of Budget",
+            cell: (info) => ((((info.getValue().commission * info.row.original.reorderTotal*0.01) - (info.getValue().commission * info.row.original.reorderBudgetTotal*0.01))/(info.getValue().commission * info.row.original.reorderBudgetTotal*0.01)*100)|0).toLocaleString()+"%",
+            footer: info => ((((data.reduce((a,b) => a + b.reorderTotal*b.brand.commission*0.01/conversions[b.brand.currency], 0) - data.reduce((a,b) => a + b.reorderBudgetTotal*b.brand.commission*0.01/conversions[b.brand.currency], 0))/(data.reduce((a,b) => a + b.reorderBudgetTotal*b.brand.commission*0.01/conversions[b.brand.currency], 0)))*100)|0).toLocaleString()+"%",
+            id: "commissionDifferencePercent"
+        })
+    ];
+
+
+    const tablePreOrder = useReactTable(
         {
-            columns: columns,
+            columns: columnsPreOrder,
+            data: data,
+            getCoreRowModel: getCoreRowModel(),
+        }
+    );
+    const tableReOrder = useReactTable(
+        {
+            columns: columnsReOrder,
             data: data,
             getCoreRowModel: getCoreRowModel(),
         }
@@ -258,43 +399,15 @@ function FrontPage() {
                 </div>
             </div>
             <div className="table-wrapper">
-                <table>
-                    <thead>
-                    {table.getHeaderGroups().map((headerGroup) => <tr key={headerGroup.id}>
-                        {headerGroup.headers.map(header => (
-                            <th key={header.id}>
-                                {header.isPlaceholder
-                                    ? null
-                                    : flexRender(
-                                        header.column.columnDef.header,
-                                        header.getContext()
-                                    )}
-                            </th>
-                        ))}
-                    </tr>)}
-                    </thead>
-                    <tbody>
-                    {table.getRowModel().rows.map(row => <tr key={row.id}>
-                        {row.getVisibleCells().map(cell => (
-                            <td key={cell.id}>
-                                {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                            </td>
-                        ))}
-                    </tr>)}
-                    </tbody>
-                    <tfoot>
-                    {table.getFooterGroups().map((footerGroup) => <tr key={footerGroup.id}>
-                        {footerGroup.headers.map(header => (
-                            <td key={header.id}>
-                                {flexRender(
-                                    header.column.columnDef.footer,
-                                    header.getContext()
-                                )}
-                            </td>
-                        ))}
-                    </tr>)}
-                    </tfoot>
-                </table>
+                <h3>Pre-Order overview</h3>
+                <OverviewTable table={tablePreOrder}/>
+                <h3>Re-Order overview</h3>
+                <OverviewTable table={tableReOrder}/>
+                <p>Top 5 customers by commission:</p>
+                {top5Customers.map((info) =>
+                    <p key={info.customer.id}>{info.customer.name} {info.commission.toLocaleString()} {selectedCurrency}</p>
+                )
+                }
             </div>
         </div>
     );

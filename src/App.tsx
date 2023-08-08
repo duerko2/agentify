@@ -10,6 +10,7 @@ import CustomerPage from "./pages/customerPage/CustomerPage";
 import BrandPage from "./pages/brandPage/BrandPage";
 import OrderPage from "./pages/orderPage/OrderPage";
 import FrontPage from "./pages/frontPage/FrontPage";
+import {SeasonsPage} from "./pages/seasonPage/SeasonsPage";
 
 
 function App() {
@@ -43,7 +44,6 @@ function App() {
                 // User is signed in, see docs for a list of available properties
                 // https://firebase.google.com/docs/reference/js/auth.user
                 const uid = nextUser.uid;
-                console.log(uid)
                 // ...
             } else {
                 setLoggedIn(false);
@@ -83,6 +83,11 @@ function App() {
             page==="orders" &&
             <div>
                 <OrderPage/>
+            </div>
+            ||
+            page==="seasons" &&
+            <div>
+                <SeasonsPage/>
             </div>
         }
         {!loggedIn &&
