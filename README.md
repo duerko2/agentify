@@ -35,5 +35,3 @@ Contributions to the project are welcome! If you would like to contribute, pleas
 This project is currently unlicensed. A license will be added in the future.
 
 As the project is a work in progress, it is essential to keep in mind that the current codebase may undergo significant changes, and features may be added or removed.
-
-Feel free to reach out if you have any questions or need further assistance. Happy coding!
