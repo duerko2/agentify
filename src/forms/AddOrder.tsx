@@ -138,7 +138,7 @@ function AddOrder() {
         const orderRef = collection(db, "order");
         if(auth.currentUser) {
             const payload = {
-                amount: order.amount,
+                amount: parseInt(order.amount.toString()),
                 brand: order.brand,
                 customer: order.customer,
                 season: order.season,

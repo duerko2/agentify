@@ -1,6 +1,10 @@
 .tabs{
     height: 100vh;
-    border-right: lightgrey;
-    border-right-style: solid;
-    border-right-width: 1px;
+    background-color: #cccccc;
+}
+.tab:hover{
+    cursor: pointer;
+}
+.tab-selected{
+    background-color: white;
 }

@@ -33,7 +33,7 @@ export function SeasonsPage() {
 
     return (
         <div className="page">
-            <Tabs setSelectedTab={setSelectedTab} tabs={tabs}/>
+            <Tabs setSelectedTab={setSelectedTab} selectedTab={selectedTab} tabs={tabs}/>
             <div>
                 <h1>Seasons Page</h1>
                 {reactComp}
