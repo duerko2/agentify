@@ -3,8 +3,8 @@
     max-width: 100%;
     overflow-x: auto;
     background-color: white;
-    margin: 10px;
-    border-radius: 15px;
+    margin: 25px;
+    box-shadow: 2px 2px 2px 2px #cccccc;
 }
 table {
     width: 100%; /* Set table width to 100% */
