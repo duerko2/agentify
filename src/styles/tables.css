@@ -6,6 +6,14 @@
     margin: 25px;
     box-shadow: 2px 2px 2px 2px #cccccc;
 }
+.chart-container{
+    width: fit-content;
+    background-color: white;
+    box-shadow: 2px 2px 2px 2px #cccccc;
+    max-width: 100%;
+    margin: 25px;
+    padding: 10px;
+}
 table {
     width: 100%; /* Set table width to 100% */
     border-collapse: collapse;

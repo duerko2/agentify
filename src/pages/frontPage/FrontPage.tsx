@@ -8,6 +8,7 @@ import OverviewTable from "./OverviewTable";
 import {BrandTable} from "../brandPage/BrandTable";
 import AddBrand from "../../forms/AddBrand";
 import {Tabs} from "../../routing/Tabs";
+import {BrandsPolarAxis} from "./BrandsPolarAxis";
 
 type Order = {
     amount:number;
@@ -44,6 +45,8 @@ type Season = {
 
 const columnHelper = createColumnHelper<{brand:Brand,orderTotal:number,budgetTotal:number,reorderTotal:number, reorderBudgetTotal:number}>();
 
+
+
 function FrontPage() {
     const [brands, setBrands] = useState<Brand[]>([]);
     const [orders, setOrders] = useState<Order[]>([]);
@@ -56,6 +59,7 @@ function FrontPage() {
     const [conversions, setConversions] = useState<{[key:string]:number}>({});
     const [availableCurrencies, setAvailableCurrencies] = useState<string[]>([]);
     const [data, setData] = useState<{brand:Brand,orderTotal:number,budgetTotal:number,reorderTotal:number, reorderBudgetTotal:number}[]>([]);
+    const [pieGraphData, setPieGraphData] = useState<{budget:number,realized:number}>();
     const [top5Customers, setTop5Customers] = useState<{customer: Customer, commission: number}[]>([]);
     const tabs = ["Pre-Orders", "Re-Orders"];
     const [selectedTab, setSelectedTab] = useState<string>("Pre-Orders");
@@ -422,6 +426,9 @@ function FrontPage() {
                 )
                 }
             </div>
+                <div className="chart-container">
+                    <BrandsPolarAxis data={data}/>
+                </div>
             </div>
         </div>
     );
