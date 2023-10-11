@@ -1,10 +1,25 @@
 .tabs{
     height: 100vh;
-    background-color: #cccccc;
+    border-right: 1px solid #e6e6e6;
+
 }
-.tab:hover{
+.tab-:hover{
     cursor: pointer;
 }
+.tab-{
+    padding-bottom: 10px;
+    padding-top: 10px;
+    border-bottom: 1px solid #282c34;
+    margin: 0px 8px 0px 8px;
+}
 .tab-selected{
-    background-color: white;
+    background-color: WHITE;
+    border-top: 25px solid transparent;
+    border-bottom: 25px solid transparent;
+    right: -25px;
+    bottom: 0;
+    border-left: 25px solid #f2f2f2;
+}
+.tab-selected p{
+    font-weight: bold;
 }
