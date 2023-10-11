@@ -5,6 +5,9 @@ import {onAuthStateChanged} from "firebase/auth";
 import {createColumnHelper, flexRender, getCoreRowModel, useReactTable} from "@tanstack/react-table";
 import {currencyConverter, getCurrencies} from "../../currencies/CurrencyConverter";
 import OverviewTable from "./OverviewTable";
+import {BrandTable} from "../brandPage/BrandTable";
+import AddBrand from "../../forms/AddBrand";
+import {Tabs} from "../../routing/Tabs";
 
 type Order = {
     amount:number;
@@ -54,6 +57,17 @@ function FrontPage() {
     const [availableCurrencies, setAvailableCurrencies] = useState<string[]>([]);
     const [data, setData] = useState<{brand:Brand,orderTotal:number,budgetTotal:number,reorderTotal:number, reorderBudgetTotal:number}[]>([]);
     const [top5Customers, setTop5Customers] = useState<{customer: Customer, commission: number}[]>([]);
+    const tabs = ["Pre-Orders", "Re-Orders"];
+    const [selectedTab, setSelectedTab] = useState<string>("Pre-Orders");
+    const [reactComp, setReactComp] = useState<JSX.Element>(<></>);
+
+    useEffect(() => {
+        if(selectedTab === "Pre-Orders"){
+            setReactComp(<OverviewTable table={tablePreOrder}/>);
+        } else if(selectedTab === "Re-Orders"){
+            setReactComp(<OverviewTable table={tableReOrder}/>);
+        }}, [selectedTab,data]
+    );
 
     useEffect(() => {
         async function getBrands() {
@@ -373,41 +387,41 @@ function FrontPage() {
     }
 
     return (
-        <div>
-            <div className="selection-wrapper">
-                <div className="selection">
-                    <label htmlFor="season"></label>
-                    <select name="season" id="season" onChange={selectSeason}>
-                        <option value="">Season</option>
-                        {
-                            seasons.map((season) =>
-                                <option key={season.id} value={season.id}>{season.name}</option>
-                            )
-                        }
-                    </select>
-                </div>
-                <div className="selection">
-                    <label htmlFor="currency"></label>
-                    <select name="currency" id="currency" onChange={selectCurrency}>
-                        <option value="EUR">Currency</option>
-                        {
-                            availableCurrencies.map((currency) =>
-                                <option key={currency} value={currency}>{currency}</option>
-                            )
-                        }
-                    </select>
-                </div>
-            </div>
+        <div className="page">
+            <Tabs setSelectedTab={setSelectedTab} selectedTab={selectedTab} tabs={tabs}/>
+            <div>
             <div className="table-wrapper">
-                <h3>Pre-Order overview</h3>
-                <OverviewTable table={tablePreOrder}/>
-                <h3>Re-Order overview</h3>
-                <OverviewTable table={tableReOrder}/>
+                <div className="selection-wrapper">
+                    <div className="selection">
+                        <label htmlFor="season"></label>
+                        <select name="season" id="season" onChange={selectSeason}>
+                            <option value="">Season</option>
+                            {
+                                seasons.map((season) =>
+                                    <option key={season.id} value={season.id}>{season.name}</option>
+                                )
+                            }
+                        </select>
+                    </div>
+                    <div className="selection">
+                        <label htmlFor="currency"></label>
+                        <select name="currency" id="currency" onChange={selectCurrency}>
+                            <option value="EUR">Currency</option>
+                            {
+                                availableCurrencies.map((currency) =>
+                                    <option key={currency} value={currency}>{currency}</option>
+                                )
+                            }
+                        </select>
+                    </div>
+                </div>
+                {reactComp}
                 <p>Top 5 customers by commission:</p>
                 {top5Customers.map((info) =>
                     <p key={info.customer.id}>{info.customer.name} {info.commission.toLocaleString()} {selectedCurrency}</p>
                 )
                 }
+            </div>
             </div>
         </div>
     );

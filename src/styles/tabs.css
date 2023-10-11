@@ -1,7 +1,7 @@
 .tabs{
     height: 100vh;
     border-right: 1px solid #e6e6e6;
-
+    background-color: white;
 }
 .tab-:hover{
     cursor: pointer;

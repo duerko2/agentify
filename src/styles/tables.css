@@ -2,6 +2,9 @@
     padding: 10px;
     max-width: 100%;
     overflow-x: auto;
+    background-color: white;
+    margin: 10px;
+    border-radius: 15px;
 }
 table {
     width: 100%; /* Set table width to 100% */

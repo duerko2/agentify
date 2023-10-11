@@ -21,7 +21,6 @@ function BrandPage(){
         <div className="page">
             <Tabs setSelectedTab={setSelectedTab} selectedTab={selectedTab} tabs={tabs}/>
             <div>
-                <h1>Brand Page</h1>
                 {reactComp}
             </div>
         </div>

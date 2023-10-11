@@ -58,8 +58,8 @@ export function BrandTable() {
 
     return (
         <div className="customers">
-            <h1>Brands</h1>
             <div className="table-wrapper">
+                <h1>Brands</h1>
                 <table>
                     <thead>
                     {table.getHeaderGroups().map((headerGroup) => (

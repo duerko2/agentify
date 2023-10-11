@@ -69,7 +69,6 @@ function App() {
         {loggedIn &&
             page==="frontpage" &&
             <div>
-                <h1>you are logged in</h1>
                 <FrontPage/>
             </div> ||
             page==="customers" &&

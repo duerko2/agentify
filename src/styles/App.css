@@ -4,7 +4,7 @@
 .page{
     display: grid;
     grid-template-columns: 120px 1fr;
-
+    background-color: BEIGE;
 }
 
 .App-logo {
