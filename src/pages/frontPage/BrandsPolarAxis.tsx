@@ -46,13 +46,15 @@ export function BrandsPolarAxis(props: { data: { brand: Brand; orderTotal: numbe
                     let reachedBudget = d.orderTotal/(d.budgetTotal+0.01);
                     if(reachedBudget>1){
                         reachedBudget=1;
+                    } else {
+                        reachedBudget=reachedBudget;
                     }
                     console.log("brand: "+d.brand.name+" order: "+d.orderTotal+" budget: "+d.budgetTotal+" % of budget: "+reachedBudget);
                     return {x:d.brand.name,y:reachedBudget};
                 })}
                 labels={({ datum }) => {
                     if(datum.y>0.01)
-                    return datum.y*100+"%"
+                    return (datum.y*100).toFixed(0)+"%"
                     else return ""
                 }
             }
