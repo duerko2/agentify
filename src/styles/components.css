@@ -1,0 +1,14 @@
+.component-wrapper{
+    padding: 2em;
+    max-width: 100%;
+    overflow-x: auto;
+    background-color: white;
+    margin: 25px;
+    box-shadow: 2px 2px 2px 2px #cccccc;
+    width: fit-content;
+}
+.componenets-wrapper-flex{
+    display:flex;
+    flex-wrap: wrap;
+    justify-content: space-evenly;
+}

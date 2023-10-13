@@ -1,9 +1,11 @@
 import React, {useEffect, useState} from "react";
-import {Brand, Customer, CustomerBrand} from "../../types/Types";
-import {collection, DocumentReference, getDocs, query, where} from "firebase/firestore";
+import {Brand} from "../../types/Types";
+import {collection, getDocs, query, where} from "firebase/firestore";
 import {auth, db} from "../../firebase/firebase";
 import {onAuthStateChanged} from "firebase/auth";
 import {createColumnHelper, flexRender, getCoreRowModel, useReactTable} from "@tanstack/react-table";
+
+
 
 
 type Order = {
@@ -15,9 +17,7 @@ type Order = {
     uid:string;
 }
 
-
-
-export function OrderTable() {
+export function BudgetTable() {
     const [data, setData] = useState<Order[]>([]);
     const seasonMap = new Map<string, string>();
     const customerMap = new Map<string, string>();
@@ -26,7 +26,7 @@ export function OrderTable() {
 
     useEffect(() => {
         async function getData() {
-            const orderQuery = query(collection(db, "order"), where("uid", "==", auth.currentUser?.uid));
+            const orderQuery = query(collection(db, "budget"), where("uid", "==", auth.currentUser?.uid));
             const orderData = await getDocs(orderQuery);
             const orders: Order[] = orderData.docs.map((doc) => (
                 {
@@ -129,6 +129,7 @@ export function OrderTable() {
     return (
         <div className="customers">
             <div className="table-wrapper">
+                <h4 style={{textAlign:"initial"}}>All Budgets</h4>
                 <table>
                     <thead>
                     {table.getHeaderGroups().map((headerGroup) => (

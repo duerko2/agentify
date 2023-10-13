@@ -11,6 +11,7 @@ import BrandPage from "./pages/brandPage/BrandPage";
 import OrderPage from "./pages/orderPage/OrderPage";
 import FrontPage from "./pages/frontPage/FrontPage";
 import {SeasonsPage} from "./pages/seasonPage/SeasonsPage";
+import BudgetPage from "./pages/budgetPage/BudgetPage";
 
 
 function App() {
@@ -87,6 +88,11 @@ function App() {
             page==="seasons" &&
             <div>
                 <SeasonsPage/>
+            </div>
+            ||
+            page==="budgets" &&
+            <div>
+                <BudgetPage/>
             </div>
         }
         {!loggedIn &&
