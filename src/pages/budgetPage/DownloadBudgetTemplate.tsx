@@ -40,7 +40,7 @@ export function DownloadBudgetTemplate() {
     const [availableBrands, setAvailableBrands] = useState<myBrand[]>([]);
     const [availableSeasons, setAvailableSeasons] = useState<Season[]>([]);
     const [availableCustomers, setAvailableCustomers] = useState<Customer[]>([]);
-    const [data, setData] = useState<{customers:{customerID:string,customerName:string}[],seasonID:string,seasonName:string,brandName:string,brandId:string,orderType:string}>()
+    const [data, setData] = useState<{customers:{customerID:string,customerName:string}[],seasonID:string,seasonName:string,brandName:string,brandId:string,orderType:string}>({customers:[],seasonID:"",seasonName:"",brandName:"",brandId:"",orderType:""})
 
 
 
@@ -100,12 +100,18 @@ export function DownloadBudgetTemplate() {
         const brand = availableBrands.find((brand) => brand.id === event.target.value);
         if (brand) {
             const brandRef = doc(db,'brand/'+brand.id);
+
+
+            setData({...data,brandId:brand.id,brandName:brand.name})
+            const cust : {customerID:string,customerName:string}[] =
+
+
         }
     }
     const selectSeason = (event: ChangeEvent<HTMLSelectElement>) => {
         const season = availableSeasons.find((season) => season.id === event.target.value);
         if(season) {
-            const seasonRef = doc(db,'season/'+season.id);
+            setData({...data,seasonID:season.id,seasonName:season.name});
         }
 
     }
@@ -118,7 +124,7 @@ export function DownloadBudgetTemplate() {
 
     const handleChange = (event: ChangeEvent<HTMLInputElement>|ChangeEvent<HTMLSelectElement>) => {
         const {name, value} = event.target;
-        //setData({...data,orderType:value});
+        setData({...data,orderType:value});
     };
 
     return (
