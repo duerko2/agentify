@@ -6,6 +6,8 @@
     margin: 25px;
     box-shadow: 2px 2px 2px 2px #cccccc;
     width: fit-content;
+    text-align: initial;
+    flex-grow:1;
 }
 .componenets-wrapper-flex{
     display:flex;

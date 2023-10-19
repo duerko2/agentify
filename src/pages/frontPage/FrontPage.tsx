@@ -253,8 +253,8 @@ function FrontPage() {
         }),
         columnHelper.accessor("brand", {
             header: "% of Budget",
-            cell: (info) => (((info.row.original.orderTotal - info.row.original.budgetTotal)/info.row.original.budgetTotal*100)|0).toLocaleString()+"%",
-            footer: ((data.reduce((a,b) => a + (b.orderTotal - b.budgetTotal)/conversions[b.brand.currency], 0)/data.reduce((a,b) => a + b.budgetTotal/conversions[b.brand.currency], 0)*100)|0).toLocaleString()+"%",
+            cell: (info) => (((info.row.original.orderTotal)/info.row.original.budgetTotal*100)|0).toLocaleString()+"%",
+            footer: ((data.reduce((a,b) => a + (b.orderTotal)/conversions[b.brand.currency], 0)/data.reduce((a,b) => a + b.budgetTotal/conversions[b.brand.currency], 0)*100)|0).toLocaleString()+"%",
             id: "differencePercent"
         }),
         columnHelper.accessor("brand", {
@@ -393,7 +393,20 @@ function FrontPage() {
     return (
         <div className="page">
             <Tabs setSelectedTab={setSelectedTab} selectedTab={selectedTab} tabs={tabs}/>
-            <div>
+            <div className="componenets-wrapper-flex">
+
+                    <div className="chart-container">
+                        <BrandsPolarAxis data={data}/>
+                    </div>
+
+                <div className="component-wrapper">
+                    <p>Top 5 customers by commission:</p>
+                    {top5Customers.map((info) =>
+                        <p key={info.customer.id}>{info.customer.name} {info.commission.toLocaleString()} {selectedCurrency}</p>
+                    )
+                    }
+                </div>
+
             <div className="table-wrapper">
                 <div className="selection-wrapper">
                     <div className="selection">
@@ -420,15 +433,7 @@ function FrontPage() {
                     </div>
                 </div>
                 {reactComp}
-                <p>Top 5 customers by commission:</p>
-                {top5Customers.map((info) =>
-                    <p key={info.customer.id}>{info.customer.name} {info.commission.toLocaleString()} {selectedCurrency}</p>
-                )
-                }
             </div>
-                <div className="chart-container">
-                    <BrandsPolarAxis data={data}/>
-                </div>
             </div>
         </div>
     );

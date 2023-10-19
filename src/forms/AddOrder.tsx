@@ -3,6 +3,7 @@ import {ChangeEvent, FormEvent, useEffect, useState} from "react";
 import {auth, db} from "../firebase/firebase";
 import '../styles/AddCustomer.css';
 import {onAuthStateChanged} from "firebase/auth";
+import {serverTimestamp} from "firebase/firestore";
 
 
 
@@ -143,6 +144,7 @@ function AddOrder() {
                 customer: order.customer,
                 season: order.season,
                 type: order.type,
+                createdAt: serverTimestamp(),
                 uid: auth.currentUser.uid,
             }
             await addDoc(orderRef, payload);

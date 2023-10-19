@@ -134,31 +134,13 @@ export function DownloadBudgetTemplate() {
     }
 
 
-    const handleSubmit = async (event: FormEvent) => {
-        event.preventDefault();
-        const headers = [
-            {label:"customerID",key:"customerId"},
-            {label:"customerName",key:"customerName"},
-            {label:"seasonID",key:"seasonId"},
-            {label:"seasonName",key:"seasonName"},
-            {label:"brandID",key:"brandId"},
-            {label:"brandName",key:"brandName"},
-            {label:"orderType",key:"orderType"},
-            {label:"currency",key:"currency"},
-            {label:"amount",key:"amount"}
-        ];
-
-        const csvData = data.customers.map((customer) => {return {customerId:customer.customerID,customerName:customer.customerName,seasonId:data.seasonID,seasonName:data.seasonName,brandId:data.brandId,brandName:data.brandName,orderType:data.orderType,currency:availableBrands.find((brand) => brand.id === data.brandId)?.currency,amount:0}});
-    };
-
-
     const handleChange = (event: ChangeEvent<HTMLInputElement>|ChangeEvent<HTMLSelectElement>) => {
         const {name, value} = event.target;
         setData({...data,orderType:value});
     };
 
     return (
-        <form onSubmit={handleSubmit} method="dialog">
+        <form method="dialog">
             <label htmlFor="brand">Brand</label>
             <select name="brand" id="brand" onChange={selectBrand}>
                 <option value="">Select a brand</option>
@@ -182,7 +164,9 @@ export function DownloadBudgetTemplate() {
                 <option value="prebook">Prebook</option>
             </select>
             <br/>
-            <CSVLink data={CSVData?.data} headers={CSVData?.headers}>Download me</CSVLink>
+            <CSVLink data={CSVData?.data} headers={CSVData?.headers}>
+                <button type="button">Download</button>
+            </CSVLink>
         </form>
     );
 }

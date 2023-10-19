@@ -13,8 +13,8 @@ export function BrandsPolarAxis(props: { data: { brand: Brand; orderTotal: numbe
         <div>
             <VictoryChart polar
                       theme={VictoryTheme.material}
-                      width={400}
-                      height={400}
+                      width={350}
+                      height={350}
                           containerComponent={<VictoryContainer responsive={false}/>}
         >
             {
