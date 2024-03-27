@@ -222,7 +222,7 @@ function FrontPage() {
                 setData(data);
             }
             putData();
-        },[orders,budgets]);
+        },[orders,budgets,selectedCurrency]);
 
 
 
@@ -403,16 +403,14 @@ function FrontPage() {
                     <p>Top 5 customers by commission:</p>
                     {top5Customers.map((info) =>
                         <p key={info.customer.id}>{info.customer.name} {info.commission.toLocaleString()} {selectedCurrency}</p>
-                    )
-                    }
+                    )}
                 </div>
 
             <div className="table-wrapper">
                 <div className="selection-wrapper">
                     <div className="selection">
                         <label htmlFor="season"></label>
-                        <select name="season" id="season" onChange={selectSeason}>
-                            <option value="">Season</option>
+                        <select name="season" id="season" value={seasons.at(selectedSeason)?.id} onChange={selectSeason}>
                             {
                                 seasons.map((season) =>
                                     <option key={season.id} value={season.id}>{season.name}</option>
@@ -422,8 +420,7 @@ function FrontPage() {
                     </div>
                     <div className="selection">
                         <label htmlFor="currency"></label>
-                        <select name="currency" id="currency" onChange={selectCurrency}>
-                            <option value="EUR">Currency</option>
+                        <select name="currency" id="currency" value={availableCurrencies.find((cur)=>selectedCurrency===cur)} onChange={selectCurrency}>
                             {
                                 availableCurrencies.map((currency) =>
                                     <option key={currency} value={currency}>{currency}</option>
