@@ -32,3 +32,9 @@
     max-width: 100%;
     cursor: pointer;
 }
+.rightSide{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin-left: auto;
+}

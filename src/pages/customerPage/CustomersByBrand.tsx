@@ -43,6 +43,7 @@ export function CustomersByBrand() {
     const [brands, setBrands] = useState<Brand[]>([]);
     const [customers, setCustomers] = useState<Customer[]>([]);
     const [orders, setOrders] = useState<Order[]>([]);
+    const [budgets, setBudgets] = useState<Order[]>([]);
     const [seasons, setSeasons] = useState<Season[]>([]);
     const [selectedSeasons, setSelectedSeasons] = useState<{firstIndex:number,lastIndex:number}>({firstIndex:0,lastIndex:0});
     const [data, setData] = useState<{ customer:Customer,wholeSeason:{season:Season,budget:number,order:number}[]}[]>([]);
@@ -157,8 +158,28 @@ export function CustomersByBrand() {
                 console.log(orders);
             }
         }
+        async function getBudgets() {
+            if(selectedBrand) {
+                const budgetQuery = query(collection(db, "budget"), where("uid", "==", auth.currentUser?.uid), where("brand", "==", doc(db, "brand", selectedBrand.id)));
+                const budgetData = await getDocs(budgetQuery);
+                const budgets: Order[] = budgetData.docs.map((doc) => {
+                    return {
+                        amount: doc.data().amount,
+                        brand: doc.data().brand,
+                        customer: doc.data().customer,
+                        season: doc.data().season,
+                        type: doc.data().type,
+                        uid: doc.data().uid,
+                        id: doc.id,
+                    } as Order
+                });
+                console.log(budgets);
+                setBudgets(budgets);
+            }
+        }
         if(auth.currentUser){
             getOrders();
+            getBudgets();
         }
     }, [selectedBrand]);
 
@@ -170,13 +191,21 @@ export function CustomersByBrand() {
             const customersByBrand = customers.filter((customer) => customer.brands.find((brand) => brand.id === selectedBrand.id));
             const data = customersByBrand.map((customer) => {
                 const customerOrders = orders.filter((order) => order.customer.id === customer.id);
-                const customerSeasons = customerOrders.map((order) => {
-                    const season = seasons.find((season) => season.id === order.season.id);
-                    if(season){
+                const customerBudgets = budgets.filter((budget) => budget.customer.id === customer.id);
+
+                console.log("customer"+customer.name);
+                console.log("orders"+customerOrders);
+                console.log("budgets"+customerBudgets);
+                const customerSeasons = seasons.map((season) => {
+                    //const season = seasons.find((season) => season.id === order.season.id);
+                    const budget = customerBudgets.filter((budget) => budget.season.id === season.id).reduce((acc, curr) => acc + curr.amount, 0);
+                    const order = customerOrders.filter((order) => order.season.id === season.id).reduce((acc, curr) => acc + curr.amount, 0);
+
+                    if(budget || order) {
                         return {
                             season: season,
-                            budget: order.amount,
-                            order: order.amount,
+                            budget: budget,
+                            order: order,
                         }
                     }
                     return {
@@ -188,8 +217,8 @@ export function CustomersByBrand() {
                         },
                         budget: 0,
                         order: 0,
-                    }
-                });
+
+                }});
                 return {
                     customer: customer,
                     wholeSeason: customerSeasons,
@@ -205,7 +234,7 @@ export function CustomersByBrand() {
         }
         putData();
 
-    }, [orders]);
+    }, [budgets]);
 
     function selectBrand(event:React.ChangeEvent){
         event.preventDefault();
@@ -258,7 +287,7 @@ export function CustomersByBrand() {
                             cell: (info) => {
                                 const seasonInfo = info.getValue().find((s) => s.season.name === season.name)
                                 if (seasonInfo)
-                                    return parseFloat(seasonInfo.budget.toString()).toLocaleString() + " " + selectedBrand?.currency;
+                                    return parseFloat(seasonInfo.budget.toString()).toLocaleString() + " " + selectedBrand?.currency || "";
                                 else return 0;
                             },
                             footer: info => info.column.id,

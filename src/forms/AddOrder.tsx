@@ -102,12 +102,19 @@ function AddOrder() {
             setAvailableCustomers(customers);
             console.log(availableCustomers)
         }
+
+
+
+
+
         if (auth.currentUser) {
             getBrands().then(getSeasons).then(getCustomers);
         }
         onAuthStateChanged(auth, (nextUser) => {
             getBrands().then(getSeasons).then(getCustomers);
         });
+
+
 
     }, []);
 

@@ -63,6 +63,9 @@ function TopBar(props: { navigate: (dest:string)=>void,loggedIn: boolean }) {
                 <TopBarItem name="Orders" onClick={route}/>
                 <TopBarItem name="Seasons" onClick={route}/>
                 <TopBarItem name="Budgets" onClick={route}/>
+                <div className="rightSide">
+                    <TopBarItem name="Logout" onClick={handleLogout}/>
+                </div>
             </>
             ) : (
             <TopBarItem name="Login" onClick={route}/>

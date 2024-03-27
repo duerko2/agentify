@@ -12,7 +12,7 @@ import OrderPage from "./pages/orderPage/OrderPage";
 import FrontPage from "./pages/frontPage/FrontPage";
 import {SeasonsPage} from "./pages/seasonPage/SeasonsPage";
 import BudgetPage from "./pages/budgetPage/BudgetPage";
-
+import {HomePage} from "./pages/HomePage/HomePage";
 
 function App() {
     const [loggedIn, setLoggedIn] = useState<boolean>(false);
@@ -42,6 +42,7 @@ function App() {
         onAuthStateChanged(auth,(nextUser) => {
             if (nextUser) {
                 setLoggedIn(true);
+                navigate("frontpage");
                 // User is signed in, see docs for a list of available properties
                 // https://firebase.google.com/docs/reference/js/auth.user
                 const uid = nextUser.uid;
@@ -96,6 +97,12 @@ function App() {
             </div>
         }
         {!loggedIn &&
+            page==="frontpage" &&
+            <div>
+                <HomePage
+                navigate={navigate}/>
+            </div>
+            || page==="login" &&
             <div>
                 <h1>Not logged in</h1>
                 <Login/>
