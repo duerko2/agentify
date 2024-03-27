@@ -49,7 +49,6 @@ export function BrandsPolarAxis(props: { data: { brand: Brand; orderTotal: numbe
                     } else {
                         reachedBudget=reachedBudget;
                     }
-                    console.log("brand: "+d.brand.name+" order: "+d.orderTotal+" budget: "+d.budgetTotal+" % of budget: "+reachedBudget);
                     return {x:d.brand.name,y:reachedBudget};
                 })}
                 labels={({ datum }) => {

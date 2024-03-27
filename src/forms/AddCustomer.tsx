@@ -30,7 +30,6 @@ function AddCustomer() {
             const brandsData = await getDocs(brandsQuery);
             const brands: CustomerBrand[] = brandsData.docs.map((doc) => ({name: doc.data().name, id: doc.id, ref:doc.ref} as CustomerBrand));
             setAvailableBrands(brands.map((brand) => ({brandDetails: brand, chosen: false})));
-            console.log(brands);
         };
         getBrands();
     }, []);
@@ -47,7 +46,6 @@ function AddCustomer() {
     const handleSubmit = async (event: FormEvent) => {
         event.preventDefault();
         // Perform any additional actions with the customer data (e.g., submit to server)
-        console.log(customer);
         const uid = auth.currentUser?.uid;
 
         if(!countries.map((country) => country.name).includes(customer.country)) {
@@ -108,7 +106,6 @@ function AddCustomer() {
                 return availableBrand;
             }
         }));
-        customer.brands.forEach((brand) => console.log(brand.name));
     }
 
     return (

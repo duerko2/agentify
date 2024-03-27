@@ -10,12 +10,7 @@ export function Tabs(props: { setSelectedTab: Dispatch<SetStateAction<string>>, 
     return (
         <div className="tabs">
             {props.tabs.map((tab) =>{
-                console.log(tab);
-                console.log(props.selectedTab);
-                return (
-
-                <Tab tab={tab} selected={tab===props.selectedTab} handleClick={handleClick} />
-
+                return (<Tab tab={tab} selected={tab===props.selectedTab} handleClick={handleClick} />
             )})}
         </div>
     );

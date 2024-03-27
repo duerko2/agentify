@@ -42,15 +42,12 @@ function TopBar(props: { navigate: (dest:string)=>void,loggedIn: boolean }) {
 
     function handleMenuClick() {
         setIsMenuOpen(!isMenuOpen);
-        console.log("Menu clicked");
     }
     function handleLogout(){
         auth.signOut();
-        console.log("Logout clicked");
     }
     function route(destination: string){
         props.navigate(destination);
-        console.log("Route clicked");
     }
 
 

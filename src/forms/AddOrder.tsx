@@ -88,7 +88,6 @@ function AddOrder() {
         async function getCustomers() {
             const customerQuery = query(collection(db, "customer"), where("uid", "==", auth.currentUser?.uid));
             const customerData = await getDocs(customerQuery);
-            console.log(customerData.docs[3].data().brands[0].id);
             const customers : Customer[] = customerData.docs.map((doc) => {
                 return {
                     address: doc.data().address,
@@ -100,7 +99,6 @@ function AddOrder() {
                     id: doc.id,
                 } as Customer});
             setAvailableCustomers(customers);
-            console.log(availableCustomers)
         }
 
 

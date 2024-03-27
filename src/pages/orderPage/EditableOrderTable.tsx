@@ -176,7 +176,6 @@ function EditableOrderTable(){
                     id: doc.id,
                 } as Season});
             seasons.sort((a,b) => {
-                console.log(a.date.getTime());
                 return a.date.getTime() - b.date.getTime();
             });
             setSeasons(seasons);
@@ -213,7 +212,6 @@ function EditableOrderTable(){
                     } as Order
                 });
                 setOrders(orders);
-                console.log(orders);
             }
         }
         if(auth.currentUser){
@@ -304,7 +302,6 @@ function EditableOrderTable(){
 
             const seasonColumns = seasons.map((season) => {
                 if (seasons.indexOf(season) >= selectedSeasons.firstIndex && seasons.indexOf(season) <= selectedSeasons.lastIndex) {
-                    console.log(season.name);
                     const extraColumns = [
                         columnHelper.accessor("wholeSeason", {
                             header: season.name + " Budget",

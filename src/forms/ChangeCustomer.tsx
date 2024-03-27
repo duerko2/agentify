@@ -19,7 +19,6 @@ export function ChangeCustomer({customer, setChangeCustomer}: { customer: Custom
             const brandsData = await getDocs(brandsQuery);
             const brands: CustomerBrand[] = brandsData.docs.map((doc) => ({name: doc.data().name, id: doc.id, ref:doc.ref} as CustomerBrand));
             setAvailableBrands(brands.map((brand) => ({brandDetails: brand, chosen: customerDetails.brands.map((customerBrand) => customerBrand.id).includes(brand.id)})));
-            console.log(brands);
         };
         getBrands();
     }, []);
@@ -45,14 +44,12 @@ export function ChangeCustomer({customer, setChangeCustomer}: { customer: Custom
                 return availableBrand;
             }
         }));
-        customer.brands.forEach((brand) => console.log(brand.name));
     }
 
 
     async function submitty(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
         const customerRef = doc(db, "customer", customer.id);
-        console.log(customerDetails)
         const customerDoc = {
             name: customerDetails.name,
             address: customerDetails.address,
@@ -61,7 +58,6 @@ export function ChangeCustomer({customer, setChangeCustomer}: { customer: Custom
             brands: customerDetails.brands?.map((brand) => doc(db,"brands",brand.id)),
             uid: auth.currentUser?.uid,
         };
-        console.log(customerDoc);
         try {
             await setDoc(customerRef, customerDoc);
             setChangeCustomer({show: false, customer: customer})

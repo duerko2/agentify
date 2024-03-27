@@ -18,7 +18,6 @@ export function UploadCSVBudget() {
             const batch = writeBatch(db);
 
             data.forEach((budget) => {
-                console.log(budget);
                 const documentRef = doc(db,'budget',budget.brandID+'_'+budget.customerID+'_'+budget.seasonID+'_'+budget.orderType);
 
                 const payload = {

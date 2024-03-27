@@ -38,7 +38,6 @@ export function OrderTable() {
                     uid: doc.data().uid,
                 } as Order));
             setData(orders);
-            console.log(orders);
         };
 
         async function getBrands() {

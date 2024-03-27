@@ -37,7 +37,6 @@ function AddBrand() {
         } catch (e) {
             console.log(e)
         }
-        console.log(brand);
         setBrand({'name':'','currency':'','commission':0,uid:auth.currentUser?.uid || ''})
     }
 

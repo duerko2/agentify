@@ -21,7 +21,6 @@ export function BrandTable() {
                     } as Brand);
             });
             setData(brands)
-            console.log(brands);
         }
         onAuthStateChanged(auth, (nextUser) => {
             getBrands();

@@ -118,7 +118,6 @@ export function CustomersByBrand() {
                     id: doc.id,
                 } as Season});
             seasons.sort((a,b) => {
-                console.log(a.date.getTime());
                 return a.date.getTime() - b.date.getTime();
             });
             setSeasons(seasons);
@@ -155,7 +154,6 @@ export function CustomersByBrand() {
                     } as Order
                 });
                 setOrders(orders);
-                console.log(orders);
             }
         }
         async function getBudgets() {
@@ -173,7 +171,6 @@ export function CustomersByBrand() {
                         id: doc.id,
                     } as Order
                 });
-                console.log(budgets);
                 setBudgets(budgets);
             }
         }
@@ -193,9 +190,6 @@ export function CustomersByBrand() {
                 const customerOrders = orders.filter((order) => order.customer.id === customer.id);
                 const customerBudgets = budgets.filter((budget) => budget.customer.id === customer.id);
 
-                console.log("customer"+customer.name);
-                console.log("orders"+customerOrders);
-                console.log("budgets"+customerBudgets);
                 const customerSeasons = seasons.map((season) => {
                     //const season = seasons.find((season) => season.id === order.season.id);
                     const budget = customerBudgets.filter((budget) => budget.season.id === season.id).reduce((acc, curr) => acc + curr.amount, 0);
@@ -280,7 +274,6 @@ export function CustomersByBrand() {
 
             const seasonColumns = seasons.map((season) => {
                 if (seasons.indexOf(season) >= selectedSeasons.firstIndex && seasons.indexOf(season) <= selectedSeasons.lastIndex) {
-                    console.log(season.name);
                     const extraColumns = [
                         columnHelper.accessor("wholeSeason", {
                             header: season.name + " Budget",

@@ -34,8 +34,6 @@ export function CustomersTable() {
                                     id: brand.id
                                 } as CustomerBrand)),
                 } as Customer));
-            console.log(customers);
-
             setData(customers);
         };
 

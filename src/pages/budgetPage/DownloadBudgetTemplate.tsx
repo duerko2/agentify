@@ -103,7 +103,6 @@ export function DownloadBudgetTemplate() {
                     id: doc.id,
                 } as Customer});
             setAvailableCustomers(customers);
-            console.log(availableCustomers)
         }
         if (auth.currentUser) {
             getBrands().then(getSeasons).then(getCustomers);
@@ -121,7 +120,6 @@ export function DownloadBudgetTemplate() {
             const customers : {customerID:string,customerName:string}[] = availableCustomers.filter((customer) => customer.brands.filter((b)=>b.id==brandRef.id)).map((customer) => {
                 return {customerID:customer.id,customerName:customer.name}
             });
-            console.log(customers);
             setData({...data,customers:customers,brandId:brand.id,brandName:brand.name})
         }
     }

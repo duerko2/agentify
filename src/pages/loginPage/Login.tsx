@@ -29,8 +29,6 @@ const Login: React.FC<LoginProps> = () => {
                 .then((userCredential) => {
                     const user = userCredential.user;
                     auth.updateCurrentUser(user)
-                    console.log("HERE")
-                    console.log(user.email);
                 });
             setPersistence(auth, browserSessionPersistence)
                 .then(() => {
