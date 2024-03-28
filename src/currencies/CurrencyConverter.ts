@@ -60,7 +60,8 @@ export async function getCurrencies() : Promise<string[]>{
         return Object.keys(data.data);
     } catch (error) {
         console.log(error);
-        return [];
+        // return some default value corresponding to the data type above
+        return ["USD","CAD", "GBP"];
     }
 
 }

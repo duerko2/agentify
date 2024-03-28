@@ -3,7 +3,13 @@ import {Customer, CustomerBrand} from "../../types/Types";
 import {collection, DocumentReference, getDocs, query, where} from "firebase/firestore";
 import {auth, db} from "../../firebase/firebase";
 import {onAuthStateChanged} from "firebase/auth";
-import {createColumnHelper, flexRender, getCoreRowModel, useReactTable} from "@tanstack/react-table";
+import {
+    createColumnHelper,
+    flexRender,
+    getCoreRowModel,
+    getPaginationRowModel,
+    useReactTable
+} from "@tanstack/react-table";
 import {ChangeCustomer} from "../../forms/ChangeCustomer";
 import "../../styles/tables.css";
 import "../../styles/overlays.css";
@@ -14,6 +20,10 @@ export function CustomersTable() {
     const [data, setData] = useState<Customer[]>([]);
     const [changeCustomer, setChangeCustomer] = useState<{show:boolean,customer:Customer}>({show:false,customer: {id:"",name:"",address:"",city:"",country:"",brands:[]}});
     const brandMap = new Map<string, string>();
+    const [pagination, setPagination] = useState({
+        pageIndex: 0, //initial page index
+        pageSize: 10, //default page size
+    });
 
     useEffect(() => {
         async function getData() {
@@ -89,6 +99,11 @@ export function CustomersTable() {
         data,
         columns,
         getCoreRowModel: getCoreRowModel(),
+        getPaginationRowModel: getPaginationRowModel(),
+        onPaginationChange: setPagination,
+        state: {
+            pagination,
+        },
         defaultColumn: {
             minSize: 0,
             size: Number.MAX_SAFE_INTEGER,
@@ -134,6 +149,67 @@ export function CustomersTable() {
                     ))}
                     </tbody>
                 </table>
+            </div>
+            <div className="flex items-center gap-2">
+                <button
+                    className="border rounded p-1"
+                    onClick={() => table.firstPage()}
+                    disabled={!table.getCanPreviousPage()}
+                >
+                    {'<<'}
+                </button>
+                <button
+                    className="border rounded p-1"
+                    onClick={() => table.previousPage()}
+                    disabled={!table.getCanPreviousPage()}
+                >
+                    {'<'}
+                </button>
+                <button
+                    className="border rounded p-1"
+                    onClick={() => table.nextPage()}
+                    disabled={!table.getCanNextPage()}
+                >
+                    {'>'}
+                </button>
+                <button
+                    className="border rounded p-1"
+                    onClick={() => table.lastPage()}
+                    disabled={!table.getCanNextPage()}
+                >
+                    {'>>'}
+                </button>
+                <span className="flex items-center gap-1">
+          <div>Page</div>
+          <strong>
+            {table.getState().pagination.pageIndex + 1} of{' '}
+              {table.getPageCount().toLocaleString()}
+          </strong>
+        </span>
+                <span className="flex items-center gap-1">
+          | Go to page:
+          <input
+              type="number"
+              defaultValue={table.getState().pagination.pageIndex + 1}
+              onChange={e => {
+                  const page = e.target.value ? Number(e.target.value) - 1 : 0
+                  table.setPageIndex(page)
+              }}
+              className="border p-1 rounded w-16"
+          />
+        </span>
+                <select
+                    value={table.getState().pagination.pageSize}
+                    onChange={e => {
+                        table.setPageSize(Number(e.target.value))
+                    }}
+                >
+                    {[10, 20, 30, 40, 50].map(pageSize => (
+                        <option key={pageSize} value={pageSize}>
+                            Show {pageSize}
+                        </option>
+                    ))}
+                </select>
             </div>
             {changeCustomer.show &&
             <div className="changecustomer">

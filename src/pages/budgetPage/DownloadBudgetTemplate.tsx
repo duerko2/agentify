@@ -2,7 +2,7 @@ import {ChangeEvent, FormEvent, useEffect, useState} from "react";
 import {addDoc, collection, doc, DocumentReference, getDocs, query, where} from "firebase/firestore";
 import {auth, db} from "../../firebase/firebase";
 import {onAuthStateChanged} from "firebase/auth";
-import { CSVLink, CSVDownload } from "react-csv";
+import { CSVLink, CSVDownload } from 'react-csv';
 
 
 
