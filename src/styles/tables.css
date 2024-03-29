@@ -57,3 +57,14 @@ tbody tr:hover {
     border-radius: 5px;
     border: 1px solid lightgray;
 }
+.table-toolbar{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+.table-search{
+    margin-block-start: 1.33em;
+    margin-block-end: 1.33em;
+    margin-inline-start: 0px;
+    margin-inline-end: 0px;
+}

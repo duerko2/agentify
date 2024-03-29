@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from "react";
 import {Tabs} from "../../routing/Tabs";
 import AddBrand from "../../forms/AddBrand";
-import {BrandTable} from "./BrandTable";
+import {BrandTable} from "./BrandTable/BrandTable";
 
 
 function BrandPage(){

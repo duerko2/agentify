@@ -1,9 +1,9 @@
 import React, {useEffect, useState} from "react";
 import {Tabs} from "../../routing/Tabs";
 import AddBrand from "../../forms/AddBrand";
-import {BrandTable} from "../brandPage/BrandTable";
+import {BrandTable} from "../brandPage/BrandTable/BrandTable";
 import AddOrder from "../../forms/AddOrder";
-import {OrderTable} from "./OrderTable";
+import {OrderTable} from "./orderTable/OrderTable";
 import EditableOrderTable from "./EditableOrderTable";
 
 
@@ -26,7 +26,6 @@ function BrandPage(){
         <div className="page">
             <Tabs setSelectedTab={setSelectedTab} selectedTab={selectedTab} tabs={tabs}/>
             <div>
-                <h1>Order Page</h1>
                 {reactComp}
             </div>
         </div>

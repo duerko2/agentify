@@ -1,81 +1,80 @@
-import React, {useEffect, useState} from "react";
-import {Brand} from "../../types/Types";
-import {collection, getDocs, query, where} from "firebase/firestore";
-import {auth, db} from "../../firebase/firebase";
-import {onAuthStateChanged} from "firebase/auth";
+import React, {useState} from "react";
+
 import {
-    createColumnHelper,
+    ColumnDef, FilterFn,
     flexRender,
-    getCoreRowModel,
+    getCoreRowModel, getFilteredRowModel,
     getPaginationRowModel,
     useReactTable
 } from "@tanstack/react-table";
+import {
+    rankItem,
+} from '@tanstack/match-sorter-utils'
 
-export function BrandTable() {
-    const [data, setData] = useState<Brand[]>([]);
+
+import {AgentifyButton} from "./AgentifyButton";
+
+
+export function AgentifyTable(props: {data: any[], columns: ColumnDef<any,any>[], title: string, rowClick?: (row: any) => void, globalFilter?: boolean}) {
+    const onRowClick = props.rowClick || (() => {});
+    const hasGlobalFilter = props.globalFilter || false;
     const [pagination, setPagination] = useState({
-        pageIndex: 0, //initial page index
-        pageSize: 10, //default page size
+        pageIndex: 0,
+        pageSize: 10,
     });
+    const [globalFilter, setGlobalFilter] = React.useState('');
 
-    useEffect(() => {
-        async function getBrands() {
-            const brandsQuery = query(collection(db, "brand"), where("uid", "==", auth.currentUser?.uid));
-            const brandsData = await getDocs(brandsQuery);
-            const brands: Brand[] = brandsData.docs.map((doc) => {
-                return (
-                    {
-                        name: doc.data().name,
-                        commission: doc.data().commission,
-                        currency: doc.data().currency,
-                    } as Brand);
-            });
-            setData(brands)
-        }
+    const fuzzyFilter: FilterFn<any> = (row, columnId, value, addMeta) => {
+        // Rank the item
+        const itemRank = rankItem(row.getValue(columnId), value)
 
-        onAuthStateChanged(auth, (nextUser) => {
-            getBrands();
-        });
+        // Store the itemRank info
+        addMeta({
+            itemRank,
+        })
 
-        getBrands();
-    }, []);
+        // Return if the item should be filtered in/out
+        return itemRank.passed
+    }
 
-
-    const columnHelper = createColumnHelper<Brand>();
-
-    const columns = [
-        columnHelper.accessor('name', {
-            header: 'Name',
-            cell: info => info.getValue(),
-            footer: info => info.column.id,
-        }),
-        columnHelper.accessor('commission', {
-            header: 'Commission',
-            cell: info => info.getValue() + "%",
-            footer: info => info.column.id,
-        }),
-        columnHelper.accessor('currency', {
-            header: 'Currency',
-            cell: info => info.getValue(),
-            footer: info => info.column.id,
-        }),
-    ];
     const table = useReactTable({
-        data,
-        columns,
+        data: props.data,
+        columns: props.columns,
+        filterFns: {
+            fuzzy: fuzzyFilter,
+        },
         getCoreRowModel: getCoreRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
         onPaginationChange: setPagination,
         state: {
+            globalFilter,
             pagination,
-        }
+        },
+        defaultColumn: {
+            minSize: 0,
+            size: Number.MAX_SAFE_INTEGER,
+            maxSize: Number.MAX_SAFE_INTEGER,
+        },
+        onGlobalFilterChange: setGlobalFilter,
+        globalFilterFn: fuzzyFilter,
+        getFilteredRowModel: getFilteredRowModel(),
+
+
     });
 
-
     return (
-        <div className="customers">
+        <div className="table">
+
             <div className="table-wrapper">
-                <h1>Brands</h1>
+                <div className="table-toolbar">
+                    <h4 style={{textAlign:"initial"}}>{props.title}</h4>
+                    {hasGlobalFilter &&
+                    <DebouncedInput
+                        value={globalFilter ?? ''}
+                        onChange={value => setGlobalFilter(String(value))}
+                        placeholder="Search"
+                    />}
+                </div>
                 <table>
                     <thead>
                     {table.getHeaderGroups().map((headerGroup) => (
@@ -95,7 +94,7 @@ export function BrandTable() {
                     </thead>
                     <tbody>
                     {table.getRowModel().rows.map(row => (
-                        <tr key={row.id}>
+                        <tr key={row.id} onClick={()=>onRowClick(row.original)}>
                             {row.getVisibleCells().map(cell => (
                                 <td key={cell.id}>
                                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -107,13 +106,12 @@ export function BrandTable() {
                 </table>
             </div>
             <div className="flex items-center gap-2">
-                <button
-                    className="border rounded p-1"
+                <AgentifyButton
+                    primaryButton={false}
+                    buttonText={'<<'}
                     onClick={() => table.firstPage()}
-                    disabled={!table.getCanPreviousPage()}
-                >
-                    {'<<'}
-                </button>
+                    isDisabled={!table.getCanPreviousPage()}
+                />
                 <button
                     className="border rounded p-1"
                     onClick={() => table.previousPage()}
@@ -169,4 +167,36 @@ export function BrandTable() {
             </div>
         </div>
     );
+}
+
+// A debounced input react component
+function DebouncedInput({
+                            value: initialValue,
+                            onChange,
+                            debounce = 500,
+                            ...props
+                        }: {
+    value: string | number
+    onChange: (value: string | number) => void
+    debounce?: number
+} & Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange'>) {
+    const [value, setValue] = React.useState(initialValue)
+
+    React.useEffect(() => {
+        setValue(initialValue)
+    }, [initialValue])
+
+    React.useEffect(() => {
+        const timeout = setTimeout(() => {
+            onChange(value)
+        }, debounce)
+
+        return () => clearTimeout(timeout)
+    }, [value])
+
+    return (
+        <div className="search-wrapper">
+            <input className="table-search" {...props} value={value} onChange={e => setValue(e.target.value)} />
+        </div>
+    )
 }

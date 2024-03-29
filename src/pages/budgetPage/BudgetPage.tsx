@@ -2,7 +2,7 @@ import React, {useEffect, useState} from "react";
 import {Tabs} from "../../routing/Tabs";
 import {UploadBudgets} from "./UploadBudgets";
 import {AddBudget} from "./AddBudget";
-import {BudgetTable} from "./BudgetTable";
+import {BudgetTable} from "./budgetTable/BudgetTable";
 
 
 function BudgetPage(){

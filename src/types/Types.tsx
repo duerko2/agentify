@@ -21,3 +21,17 @@ interface Customer {
     country: string;
     brands: CustomerBrand[];
 }
+export type Order = {
+    amount:number;
+    brand:Brand;
+    customer:string;
+    season:string;
+    type:string;
+    uid:string;
+}
+export type Season = {
+    name:string;
+    date:Date;
+    uid:string;
+    id:string;
+}

@@ -2,7 +2,7 @@ import React, {useEffect, useState} from "react";
 import AddCustomer from "../../forms/AddCustomer";
 import "../../styles/tables.css"
 import {Tabs} from "../../routing/Tabs";
-import {CustomersTable} from "./CustomersTable";
+import {CustomersTable} from "./customerTable/CustomersTable";
 import {CustomersByBrand} from "./CustomersByBrand";
 
 function CustomerPage() {
@@ -30,7 +30,6 @@ function CustomerPage() {
         <div className="page">
             <Tabs setSelectedTab={setSelectedTab} selectedTab={selectedTab} tabs={tabs}/>
             <div>
-                <h1>Customer Page</h1>
                 {reactComp}
             </div>
         </div>

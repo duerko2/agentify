@@ -5,7 +5,7 @@ import {onAuthStateChanged} from "firebase/auth";
 import {createColumnHelper, flexRender, getCoreRowModel, useReactTable} from "@tanstack/react-table";
 import {currencyConverter, getCurrencies} from "../../currencies/CurrencyConverter";
 import OverviewTable from "./OverviewTable";
-import {BrandTable} from "../brandPage/BrandTable";
+import {BrandTable} from "../brandPage/BrandTable/BrandTable";
 import AddBrand from "../../forms/AddBrand";
 import {Tabs} from "../../routing/Tabs";
 import {BrandsPolarAxis} from "./BrandsPolarAxis";
