@@ -1,3 +1,6 @@
+.table {
+    width: 100%;
+}
 .table-wrapper{
     padding: 10px;
     max-width: 100%;
@@ -47,8 +50,6 @@ tbody tr:hover {
     display: flex;
     flex-direction: row;
     justify-content: end;
-    padding: 10px;
-    margin : 10px;
 }
 .selection{
     padding: 10px;

@@ -26,6 +26,7 @@ export function OrderTable() {
                     season: seasonMap.get(doc.data().season.id),
                     type: doc.data().type,
                     uid: doc.data().uid,
+                    createdAt: doc.data().createdAt.toDate(),
                 } as Order));
             setData(orders);
         };

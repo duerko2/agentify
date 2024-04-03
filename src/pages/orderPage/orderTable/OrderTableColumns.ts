@@ -1,5 +1,6 @@
 import {createColumnHelper} from "@tanstack/react-table";
 import {Order} from "../../../types/Types";
+import {toDateStringFormat} from "../../../utils/Dates";
 
 export function getOrderColumns(){
     const columnHelper = createColumnHelper<Order>();
@@ -22,6 +23,11 @@ export function getOrderColumns(){
         columnHelper.accessor('type', {
             header: 'Type',
             cell: info => info.getValue(),
+            footer: info => info.column.id,
+        }),
+        columnHelper.accessor('createdAt', {
+            header: 'Date',
+            cell: info => toDateStringFormat(info.getValue()),
             footer: info => info.column.id,
         }),
         columnHelper.accessor('amount', {

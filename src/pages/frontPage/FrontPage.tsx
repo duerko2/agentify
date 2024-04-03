@@ -9,6 +9,8 @@ import {BrandTable} from "../brandPage/BrandTable/BrandTable";
 import AddBrand from "../../forms/AddBrand";
 import {Tabs} from "../../routing/Tabs";
 import {BrandsPolarAxis} from "./BrandsPolarAxis";
+import {AgentifyTable} from "../../component/AgentifyTable";
+import {getPreOrderColumns, getReOrderColumns} from "./FrontPageTableColumns";
 
 type Order = {
     amount:number;
@@ -43,7 +45,6 @@ type Season = {
 }
 
 
-const columnHelper = createColumnHelper<{brand:Brand,orderTotal:number,budgetTotal:number,reorderTotal:number, reorderBudgetTotal:number}>();
 
 
 
@@ -64,13 +65,14 @@ function FrontPage() {
     const tabs = ["Pre-Orders", "Re-Orders"];
     const [selectedTab, setSelectedTab] = useState<string>("Pre-Orders");
     const [reactComp, setReactComp] = useState<JSX.Element>(<></>);
+    const [columns, setColumns] = useState<any[]>([]);
 
     useEffect(() => {
         if(selectedTab === "Pre-Orders"){
-            setReactComp(<OverviewTable table={tablePreOrder}/>);
+            setColumns(getPreOrderColumns(data, conversions, selectedCurrency));
         } else if(selectedTab === "Re-Orders"){
-            setReactComp(<OverviewTable table={tableReOrder}/>);
-        }}, [selectedTab,data]
+            setColumns(getReOrderColumns(data, conversions, selectedCurrency));
+        }}, [selectedTab,data,selectedCurrency]
     );
 
     useEffect(() => {
@@ -222,163 +224,8 @@ function FrontPage() {
                 setData(data);
             }
             putData();
-        },[orders,budgets,selectedCurrency]);
+        },[orders,budgets,selectedCurrency, selectedTab]);
 
-
-
-    const columnsPreOrder  = [
-        columnHelper.accessor("brand", {
-            header: "Brand",
-            cell: (info) => info.getValue().name,
-            footer: "TOTAL",
-            id: "brand"
-        }),
-        columnHelper.accessor("budgetTotal", {
-            header: "Budget",
-            cell: (info) => info.getValue().toLocaleString(),
-            footer: data.reduce((a,b) => a + b.budgetTotal/conversions[b.brand.currency], 0).toLocaleString(),
-            id: "budget"
-        }),
-        columnHelper.accessor("orderTotal", {
-            header: "Orders",
-            cell: (info) => info.getValue().toLocaleString(),
-            footer: data.reduce((a,b) => a + b.orderTotal/conversions[b.brand.currency], 0).toLocaleString(),
-            id: "orders"
-        }),
-        columnHelper.accessor("brand", {
-            header: "Difference",
-            cell: (info) => (info.row.original.orderTotal - info.row.original.budgetTotal).toLocaleString(),
-            footer: data.reduce((a,b) => a + (b.orderTotal - b.budgetTotal)/conversions[b.brand.currency], 0).toLocaleString(),
-            id: "difference"
-        }),
-        columnHelper.accessor("brand", {
-            header: "% of Budget",
-            cell: (info) => (((info.row.original.orderTotal)/info.row.original.budgetTotal*100)|0).toLocaleString()+"%",
-            footer: ((data.reduce((a,b) => a + (b.orderTotal)/conversions[b.brand.currency], 0)/data.reduce((a,b) => a + b.budgetTotal/conversions[b.brand.currency], 0)*100)|0).toLocaleString()+"%",
-            id: "differencePercent"
-        }),
-        columnHelper.accessor("brand", {
-            header: "Currency",
-            cell: (info) => info.getValue().currency,
-            footer: selectedCurrency,
-            id: "currency"
-        }),
-        columnHelper.accessor("brand", {
-            header: "Commission",
-            cell: (info) => info.getValue().commission+"%",
-            footer: "",
-            id: "commission"
-        }),
-        columnHelper.accessor("brand", {
-            header: "Budgeted Commission",
-            cell: (info) => (info.getValue().commission * info.row.original.budgetTotal*0.01).toLocaleString(),
-            footer: info => data.reduce((a,b) => a + b.budgetTotal*b.brand.commission*0.01/conversions[b.brand.currency], 0).toLocaleString(),
-            id: "budgetCommission"
-        }),
-        columnHelper.accessor("brand", {
-            header: "Expected Commission",
-            cell: (info) => (info.getValue().commission * info.row.original.orderTotal*0.01).toLocaleString(),
-            footer: info => data.reduce((a,b) => a + b.orderTotal*b.brand.commission*0.01/conversions[b.brand.currency], 0).toLocaleString(),
-            id: "expCommission"
-        }),
-        columnHelper.accessor("brand", {
-            header: "Difference",
-            cell: (info) => ((info.getValue().commission * info.row.original.orderTotal*0.01) - (info.getValue().commission * info.row.original.budgetTotal*0.01)).toLocaleString(),
-            footer: info => (data.reduce((a,b) => a + b.orderTotal*b.brand.commission*0.01/conversions[b.brand.currency], 0) - data.reduce((a,b) => a + b.budgetTotal*b.brand.commission*0.01/conversions[b.brand.currency], 0)).toLocaleString(),
-            id: "commissionDifference"
-        }),
-        columnHelper.accessor("brand", {
-            header: "% of Budget",
-            cell: (info) => ((((info.getValue().commission * info.row.original.orderTotal*0.01) - (info.getValue().commission * info.row.original.budgetTotal*0.01))/(info.getValue().commission * info.row.original.budgetTotal*0.01)*100)|0).toLocaleString()+"%",
-            footer: info => ((((data.reduce((a,b) => a + b.orderTotal*b.brand.commission*0.01/conversions[b.brand.currency], 0) - data.reduce((a,b) => a + b.budgetTotal*b.brand.commission*0.01/conversions[b.brand.currency], 0))/(data.reduce((a,b) => a + b.budgetTotal*b.brand.commission*0.01/conversions[b.brand.currency], 0)))*100)|0).toLocaleString()+"%",
-            id: "commissionDifferencePercent"
-        })
-    ];
-
-    const columnsReOrder  = [
-        columnHelper.accessor("brand", {
-            header: "Brand",
-            cell: (info) => info.getValue().name,
-            footer: "TOTAL",
-            id: "brand"
-        }),
-        columnHelper.accessor("reorderBudgetTotal", {
-            header: "Budget",
-            cell: (info) => info.getValue().toLocaleString(),
-            footer: data.reduce((a,b) => a + b.reorderBudgetTotal/conversions[b.brand.currency], 0).toLocaleString(),
-            id: "budget"
-        }),
-        columnHelper.accessor("reorderTotal", {
-            header: "Orders",
-            cell: (info) => info.getValue().toLocaleString(),
-            footer: data.reduce((a,b) => a + b.reorderTotal/conversions[b.brand.currency], 0).toLocaleString(),
-            id: "orders"
-        }),
-        columnHelper.accessor("brand", {
-            header: "Difference",
-            cell: (info) => (info.row.original.reorderTotal - info.row.original.reorderBudgetTotal).toLocaleString(),
-            footer: data.reduce((a,b) => a + (b.reorderTotal - b.reorderBudgetTotal)/conversions[b.brand.currency], 0).toLocaleString(),
-            id: "difference"
-        }),
-        columnHelper.accessor("brand", {
-            header: "% of Budget",
-            cell: (info) => (((info.row.original.reorderTotal - info.row.original.reorderBudgetTotal)/info.row.original.reorderBudgetTotal*100)|0).toLocaleString()+"%",
-            footer: ((data.reduce((a,b) => a + (b.reorderTotal - b.reorderBudgetTotal)/conversions[b.brand.currency], 0)/data.reduce((a,b) => a + b.reorderBudgetTotal/conversions[b.brand.currency], 0)*100)|0).toLocaleString()+"%",
-            id: "differencePercent"
-        }),
-        columnHelper.accessor("brand", {
-            header: "Currency",
-            cell: (info) => info.getValue().currency,
-            footer: selectedCurrency,
-            id: "currency"
-        }),
-        columnHelper.accessor("brand", {
-            header: "Commission",
-            cell: (info) => info.getValue().commission+"%",
-            footer: "",
-            id: "commission"
-        }),
-        columnHelper.accessor("brand", {
-            header: "Budgeted Commission",
-            cell: (info) => (info.getValue().commission * info.row.original.reorderBudgetTotal*0.01).toLocaleString(),
-            footer: info => data.reduce((a,b) => a + b.reorderBudgetTotal*b.brand.commission*0.01/conversions[b.brand.currency], 0).toLocaleString(),
-            id: "budgetCommission"
-        }),
-        columnHelper.accessor("brand", {
-            header: "Expected Commission",
-            cell: (info) => (info.getValue().commission * info.row.original.reorderTotal*0.01).toLocaleString(),
-            footer: info => data.reduce((a,b) => a + b.reorderTotal*b.brand.commission*0.01/conversions[b.brand.currency], 0).toLocaleString(),
-            id: "expCommission"
-        }),
-        columnHelper.accessor("brand", {
-            header: "Difference",
-            cell: (info) => ((info.getValue().commission * info.row.original.reorderTotal*0.01) - (info.getValue().commission * info.row.original.reorderBudgetTotal*0.01)).toLocaleString(),
-            footer: info => (data.reduce((a,b) => a + b.reorderTotal*b.brand.commission*0.01/conversions[b.brand.currency], 0) - data.reduce((a,b) => a + b.reorderBudgetTotal*b.brand.commission*0.01/conversions[b.brand.currency], 0)).toLocaleString(),
-            id: "commissionDifference"
-        }),
-        columnHelper.accessor("brand", {
-            header: "% of Budget",
-            cell: (info) => ((((info.getValue().commission * info.row.original.reorderTotal*0.01) - (info.getValue().commission * info.row.original.reorderBudgetTotal*0.01))/(info.getValue().commission * info.row.original.reorderBudgetTotal*0.01)*100)|0).toLocaleString()+"%",
-            footer: info => ((((data.reduce((a,b) => a + b.reorderTotal*b.brand.commission*0.01/conversions[b.brand.currency], 0) - data.reduce((a,b) => a + b.reorderBudgetTotal*b.brand.commission*0.01/conversions[b.brand.currency], 0))/(data.reduce((a,b) => a + b.reorderBudgetTotal*b.brand.commission*0.01/conversions[b.brand.currency], 0)))*100)|0).toLocaleString()+"%",
-            id: "commissionDifferencePercent"
-        })
-    ];
-
-
-    const tablePreOrder = useReactTable(
-        {
-            columns: columnsPreOrder,
-            data: data,
-            getCoreRowModel: getCoreRowModel(),
-        }
-    );
-    const tableReOrder = useReactTable(
-        {
-            columns: columnsReOrder,
-            data: data,
-            getCoreRowModel: getCoreRowModel(),
-        }
-    );
 
     function selectCurrency(event: React.ChangeEvent<HTMLSelectElement>) {
         event.preventDefault();
@@ -390,14 +237,29 @@ function FrontPage() {
         setSelectedSeason(index);
     }
 
+    const filters = [{name: "season", value: seasons.at(selectedSeason)?.id, onChange: selectSeason, opts: seasons as any[], takeID: true},{name: "currency", value: availableCurrencies.find((cur)=>selectedCurrency===cur), onChange: selectCurrency, opts: availableCurrencies as any[], takeID: false}]
+
+
     return (
         <div className="page">
             <Tabs setSelectedTab={setSelectedTab} selectedTab={selectedTab} tabs={tabs}/>
-            <div className="componenets-wrapper-flex">
 
-                    <div className="chart-container">
-                        <BrandsPolarAxis data={data}/>
-                    </div>
+
+            <div className="componenets-wrapper-flex">
+                <AgentifyTable data={data} columns={columns} title={"Overview"} filters={filters} pagination={false} footer={true}/>
+
+                <div className="chart-container">
+                    <p>Brand progress</p>
+                    <BrandsPolarAxis data={data}/>
+                </div>
+                <div className="chart-container">
+                    <p>Burn up chart</p>
+                    <canvas id="preOrderChart" width="400" height="400"></canvas>
+                </div>
+                <div className="chart-container">
+                    <p>Commission over seasons</p>
+                    <canvas id="reOrderChart" width="400" height="400"></canvas>
+                </div>
 
                 <div className="component-wrapper">
                     <p>Top 5 customers by commission:</p>
@@ -406,31 +268,6 @@ function FrontPage() {
                     )}
                 </div>
 
-            <div className="table-wrapper">
-                <div className="selection-wrapper">
-                    <div className="selection">
-                        <label htmlFor="season"></label>
-                        <select name="season" id="season" value={seasons.at(selectedSeason)?.id} onChange={selectSeason}>
-                            {
-                                seasons.map((season) =>
-                                    <option key={season.id} value={season.id}>{season.name}</option>
-                                )
-                            }
-                        </select>
-                    </div>
-                    <div className="selection">
-                        <label htmlFor="currency"></label>
-                        <select name="currency" id="currency" value={availableCurrencies.find((cur)=>selectedCurrency===cur)} onChange={selectCurrency}>
-                            {
-                                availableCurrencies.map((currency) =>
-                                    <option key={currency} value={currency}>{currency}</option>
-                                )
-                            }
-                        </select>
-                    </div>
-                </div>
-                {reactComp}
-            </div>
             </div>
         </div>
     );

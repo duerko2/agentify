@@ -16,7 +16,7 @@ export function Tabs(props: { setSelectedTab: Dispatch<SetStateAction<string>>, 
     );
 }
 
-function Tab(props:{ tab: string,selected:boolean, handleClick: (name: string) => void; }){
+function Tab(props:{ tab: string, selected:boolean, handleClick: (name: string) => void; }){
 
     return (
         <div className={`tab-${props.selected ? 'selected' : ''}`} key={props.tab} onClick={

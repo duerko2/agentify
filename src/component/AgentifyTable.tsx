@@ -13,17 +13,20 @@ import {
 
 
 import {AgentifyButton} from "./AgentifyButton";
+import {isNullOrUndefined} from "util";
 
 
-export function AgentifyTable(props: {data: any[], columns: ColumnDef<any,any>[], title: string, rowClick?: (row: any) => void, globalFilter?: boolean}) {
+export function AgentifyTable(props: {data: any[], columns: ColumnDef<any,any>[], title: string, rowClick?: (row: any) => void, globalFilter?: boolean, pagination?: boolean, footer?: boolean, filters?: {name: string, value: string | undefined, onChange: (event: React.ChangeEvent<HTMLSelectElement>) => void, opts: any[], takeID: boolean}[]}) {
     const onRowClick = props.rowClick || (() => {});
     const hasGlobalFilter = props.globalFilter || false;
     const [pagination, setPagination] = useState({
         pageIndex: 0,
         pageSize: 10,
     });
+    const filters = props.filters || [];
     const [globalFilter, setGlobalFilter] = React.useState('');
-
+    const paginationEnabled = props.pagination == undefined ? true : props.pagination;
+    const footerEnabled = props.footer || false
     const fuzzyFilter: FilterFn<any> = (row, columnId, value, addMeta) => {
         // Rank the item
         const itemRank = rankItem(row.getValue(columnId), value)
@@ -68,6 +71,24 @@ export function AgentifyTable(props: {data: any[], columns: ColumnDef<any,any>[]
             <div className="table-wrapper">
                 <div className="table-toolbar">
                     <h4 style={{textAlign:"initial"}}>{props.title}</h4>
+
+                    <div className="selection-wrapper">
+                    {filters.length>0 &&
+                        filters.map((filter) => (
+                            <div className="selection">
+                                <label htmlFor={filter.name}></label>
+                                <select name={filter.name} id={filter.name} value={filter.value} onChange={filter.onChange}>
+                                    {
+                                        filter.opts.map((opt) =>
+                                            filter.takeID ? <option key={opt.id} value={opt.id}>{opt.name}</option> : <option key={opt} value={opt}>{opt}</option>
+                                        )
+                                    }
+                                </select>
+                            </div>
+                        ))
+                    }
+                </div>
+
                     {hasGlobalFilter &&
                     <DebouncedInput
                         value={globalFilter ?? ''}
@@ -103,68 +124,85 @@ export function AgentifyTable(props: {data: any[], columns: ColumnDef<any,any>[]
                         </tr>
                     ))}
                     </tbody>
+                    {footerEnabled &&
+                        <tfoot>
+                        {table.getFooterGroups().map((footerGroup) => <tr key={footerGroup.id}>
+                            {footerGroup.headers.map(header => (
+                                <td key={header.id}>
+                                    {flexRender(
+                                        header.column.columnDef.footer,
+                                        header.getContext()
+                                    )}
+                                </td>
+                            ))}
+                        </tr>)}
+                        </tfoot>
+                    }
+
                 </table>
             </div>
-            <div className="flex items-center gap-2">
-                <AgentifyButton
-                    primaryButton={false}
-                    buttonText={'<<'}
-                    onClick={() => table.firstPage()}
-                    isDisabled={!table.getCanPreviousPage()}
-                />
-                <button
-                    className="border rounded p-1"
-                    onClick={() => table.previousPage()}
-                    disabled={!table.getCanPreviousPage()}
-                >
-                    {'<'}
-                </button>
-                <button
-                    className="border rounded p-1"
-                    onClick={() => table.nextPage()}
-                    disabled={!table.getCanNextPage()}
-                >
-                    {'>'}
-                </button>
-                <button
-                    className="border rounded p-1"
-                    onClick={() => table.lastPage()}
-                    disabled={!table.getCanNextPage()}
-                >
-                    {'>>'}
-                </button>
-                <span className="flex items-center gap-1">
-          <div>Page</div>
-          <strong>
-            {table.getState().pagination.pageIndex + 1} of{' '}
-              {table.getPageCount().toLocaleString()}
-          </strong>
-        </span>
-                <span className="flex items-center gap-1">
-          | Go to page:
-          <input
-              type="number"
-              defaultValue={table.getState().pagination.pageIndex + 1}
-              onChange={e => {
-                  const page = e.target.value ? Number(e.target.value) - 1 : 0
-                  table.setPageIndex(page)
-              }}
-              className="border p-1 rounded w-16"
-          />
-        </span>
-                <select
-                    value={table.getState().pagination.pageSize}
-                    onChange={e => {
-                        table.setPageSize(Number(e.target.value))
-                    }}
-                >
-                    {[10, 20, 30, 40, 50].map(pageSize => (
-                        <option key={pageSize} value={pageSize}>
-                            Show {pageSize}
-                        </option>
-                    ))}
-                </select>
-            </div>
+            {paginationEnabled &&
+                <div className="flex items-center gap-2">
+                    <AgentifyButton
+                        primaryButton={false}
+                        buttonText={'<<'}
+                        onClick={() => table.firstPage()}
+                        isDisabled={!table.getCanPreviousPage()}
+                    />
+                    <button
+                        className="border rounded p-1"
+                        onClick={() => table.previousPage()}
+                        disabled={!table.getCanPreviousPage()}
+                    >
+                        {'<'}
+                    </button>
+                    <button
+                        className="border rounded p-1"
+                        onClick={() => table.nextPage()}
+                        disabled={!table.getCanNextPage()}
+                    >
+                        {'>'}
+                    </button>
+                    <button
+                        className="border rounded p-1"
+                        onClick={() => table.lastPage()}
+                        disabled={!table.getCanNextPage()}
+                    >
+                        {'>>'}
+                    </button>
+                    <span className="flex items-center gap-1">
+              <div>Page</div>
+              <strong>
+                {table.getState().pagination.pageIndex + 1} of{' '}
+                  {table.getPageCount().toLocaleString()}
+              </strong>
+            </span>
+                    <span className="flex items-center gap-1">
+              | Go to page:
+              <input
+                  type="number"
+                  defaultValue={table.getState().pagination.pageIndex + 1}
+                  onChange={e => {
+                      const page = e.target.value ? Number(e.target.value) - 1 : 0
+                      table.setPageIndex(page)
+                  }}
+                  className="border p-1 rounded w-16"
+              />
+            </span>
+                    <select
+                        value={table.getState().pagination.pageSize}
+                        onChange={e => {
+                            table.setPageSize(Number(e.target.value))
+                        }}
+                    >
+                        {[10, 20, 30, 40, 50].map(pageSize => (
+                            <option key={pageSize} value={pageSize}>
+                                Show {pageSize}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+            }
         </div>
     );
 }

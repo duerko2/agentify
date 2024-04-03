@@ -27,6 +27,7 @@ export type Order = {
     customer:string;
     season:string;
     type:string;
+    createdAt:Date;
     uid:string;
 }
 export type Season = {
