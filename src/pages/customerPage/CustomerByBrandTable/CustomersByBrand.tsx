@@ -1,8 +1,9 @@
 import React, {useEffect, useState} from "react";
 import {collection, doc, DocumentReference, getDocs, query, where} from "firebase/firestore";
-import {auth, db} from "../../firebase/firebase";
+import {auth, db} from "../../../firebase/firebase";
 import {onAuthStateChanged} from "firebase/auth";
 import {createColumnHelper, flexRender, getCoreRowModel, useReactTable} from "@tanstack/react-table";
+import {AgentifyTable} from "../../../component/AgentifyTable";
 
 type Order = {
     amount:number;
@@ -121,6 +122,7 @@ export function CustomersByBrand() {
                 return a.date.getTime() - b.date.getTime();
             });
             setSeasons(seasons);
+            setSelectedSeasons({firstIndex:0,lastIndex:seasons.length-1})
         }
         if(auth.currentUser){
             getBrands();
@@ -320,7 +322,7 @@ export function CustomersByBrand() {
 
         }
         changeColumns();
-    }, [selectedSeasons,showDelta])
+    }, [selectedBrand, selectedSeasons,showDelta])
 
 
 
@@ -356,7 +358,33 @@ export function CustomersByBrand() {
         setShowDelta(!showDelta);
     }
 
+    const filters = [
+        {
+            name: "brand",
+            value: selectedBrand?.id || "",
+            onChange: selectBrand,
+            opts: brands as any[],
+            takeID: true
+        },
+        {
+            name: "firstSeason",
+            value: seasons.at(selectedSeasons.firstIndex)?.id || seasons.at(0)?.id || "",
+            onChange: selectFirstSeason,
+            opts: seasons as any[],
+            takeID: true
+
+        },
+        {
+            name: "secondSeason",
+            value: seasons.at(selectedSeasons.lastIndex)?.id || seasons.at(seasons.length-1)?.id || "",
+            onChange: selectLastSeason,
+            opts: seasons as any[],
+            takeID: true
+        }
+    ];
     return <div className="customers">
+    <AgentifyTable data={data} columns={columns} title={"Customers By Brand"} filters={filters} globalFilter={true}/>
+
         <h1>Customers By Brand</h1>
         <div className="selection-wrapper">
             <div className="selection">

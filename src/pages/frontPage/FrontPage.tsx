@@ -2,15 +2,12 @@ import {collection, doc, DocumentReference, getDocs, query, where} from "firebas
 import React, {useEffect, useState} from "react";
 import {auth, db} from "../../firebase/firebase";
 import {onAuthStateChanged} from "firebase/auth";
-import {createColumnHelper, flexRender, getCoreRowModel, useReactTable} from "@tanstack/react-table";
 import {currencyConverter, getCurrencies} from "../../currencies/CurrencyConverter";
-import OverviewTable from "./OverviewTable";
-import {BrandTable} from "../brandPage/BrandTable/BrandTable";
-import AddBrand from "../../forms/AddBrand";
 import {Tabs} from "../../routing/Tabs";
 import {BrandsPolarAxis} from "./BrandsPolarAxis";
 import {AgentifyTable} from "../../component/AgentifyTable";
-import {getPreOrderColumns, getReOrderColumns} from "./FrontPageTableColumns";
+import {getPreOrderColumns, getReOrderColumns} from "./overviewTable/FrontPageTableColumns";
+import OverviewTable from "./overviewTable/OverviewTable";
 
 type Order = {
     amount:number;
@@ -200,7 +197,6 @@ function FrontPage() {
                 setReorderBudgets(budgets.filter((budget) => budget.type === "reorder"));
             }
         }
-
         if(auth.currentUser){
             getOrders();
         }

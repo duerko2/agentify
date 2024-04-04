@@ -3,7 +3,7 @@ import AddCustomer from "../../forms/AddCustomer";
 import "../../styles/tables.css"
 import {Tabs} from "../../routing/Tabs";
 import {CustomersTable} from "./customerTable/CustomersTable";
-import {CustomersByBrand} from "./CustomersByBrand";
+import {CustomersByBrand} from "./CustomerByBrandTable/CustomersByBrand";
 
 function CustomerPage() {
     const tabs = ["Customers", "By Brand","New customer"];

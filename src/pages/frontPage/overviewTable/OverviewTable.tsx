@@ -9,6 +9,9 @@ type Brand = {
     id:string;
 }
 
+/**
+ * @deprecated Use AgentifyTable instead
+ */
 function OverviewTable({table} :  {table: Table<{brand: Brand, orderTotal: number, budgetTotal: number, reorderTotal: number, reorderBudgetTotal: number}>}){
 
     return(
