@@ -343,14 +343,6 @@ export function CustomersByBrand() {
         }
     }
 
-    const table = useReactTable(
-        {
-            columns: columns,
-            data: data,
-            getCoreRowModel: getCoreRowModel(),
-        }
-    );
-
 
 
     function clickShowDelta(event:React.FormEvent){
@@ -358,96 +350,39 @@ export function CustomersByBrand() {
         setShowDelta(!showDelta);
     }
 
-    const filters = [
-        {
-            name: "brand",
-            value: selectedBrand?.id || "",
-            onChange: selectBrand,
-            opts: brands as any[],
-            takeID: true
-        },
-        {
-            name: "firstSeason",
-            value: seasons.at(selectedSeasons.firstIndex)?.id || seasons.at(0)?.id || "",
-            onChange: selectFirstSeason,
-            opts: seasons as any[],
-            takeID: true
+    const filters = [{
+        name: "brand",
+        value: selectedBrand?.id || "",
+        onChange: selectBrand,
+        opts: brands as any[],
+        takeID: true
+    },
+    {
+        name: "firstSeason",
+        value: seasons.at(selectedSeasons.firstIndex)?.id || seasons.at(0)?.id || "",
+        onChange: selectFirstSeason,
+        opts: seasons as any[],
+        takeID: true
 
-        },
-        {
-            name: "secondSeason",
-            value: seasons.at(selectedSeasons.lastIndex)?.id || seasons.at(seasons.length-1)?.id || "",
-            onChange: selectLastSeason,
-            opts: seasons as any[],
-            takeID: true
-        }
-    ];
-    return <div className="customers">
-    <AgentifyTable data={data} columns={columns} title={"Customers By Brand"} filters={filters} globalFilter={true}/>
+    },
+    {
+        name: "secondSeason",
+        value: seasons.at(selectedSeasons.lastIndex)?.id || seasons.at(seasons.length-1)?.id || "",
+        onChange: selectLastSeason,
+        opts: seasons as any[],
+        takeID: true
+    }];
 
-        <h1>Customers By Brand</h1>
-        <div className="selection-wrapper">
-            <div className="selection">
-                <label htmlFor="brand"></label>
-                <select name="brand" id="brand" onChange={selectBrand}>
-                    <option value="">Select Brand</option>
-                    {brands.map((brand) => <option key={brand.id} value={brand.id}>{brand.name}</option>)}
-                </select>
-            </div>
-            <div className="selection">
-                <label htmlFor="firstSeason"></label>
-                <select name="firstSeason" id="firstSeason" onChange={selectFirstSeason}>
-                    <option value="">From Season</option>
-                    {
-                       seasons.map((season) => <option key={season.id} value={season.id}>{season.name}</option>)
-                    }
-                </select>
-            </div>
-            <div className="selection">
-                <label htmlFor="secondSeason"></label>
-                <select name="secondSeason" id="secondSeason" onChange={selectLastSeason}>
-                    <option value="">To Season</option>
-                    {
-                        seasons.map((season) =>
-                            <option key={season.id} value={season.id}>{season.name}</option>
-                        )
-                    }
-                </select>
-            </div>
-            <div className="selection">
-                <label htmlFor="showDelta">
-                    Show Delta
-                    <input name="showDelta" id="showDelta" type="checkbox" checked={showDelta} onInput={clickShowDelta}/>
-                </label>
-            </div>
+    const checkBoxes = [{
+        name: "showDelta",
+        label: "Show Delta",
+        checked: showDelta,
+        onInput: clickShowDelta
+    }];
+
+    return (
+        <div className="customers">
+            <AgentifyTable data={data} columns={columns} title={"Customers By Brand"} filters={filters} checkboxes={checkBoxes} globalFilter={true}/>
         </div>
-        <div className="table-wrapper"> {table &&
-            <table>
-                <thead>
-                {table.getHeaderGroups().map((headerGroup) => <tr key={headerGroup.id}>
-                        {headerGroup.headers.map(header => (
-                            <th key={header.id}>
-                                {header.isPlaceholder
-                                    ? null
-                                    : flexRender(
-                                        header.column.columnDef.header,
-                                        header.getContext()
-                                    )}
-                            </th>
-                        ))}
-                    </tr>)}
-                </thead>
-                <tbody>
-                {table.getRowModel().rows.map(row => <tr key={row.id}>
-                        {row.getVisibleCells().map(cell => (
-                            <td key={cell.id}>
-                                {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                            </td>
-                        ))}
-                    </tr>)}
-                </tbody>
-            </table>
-        }
-        </div>
-    </div>;
+    );
 }

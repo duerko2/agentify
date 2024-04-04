@@ -16,7 +16,19 @@ import {AgentifyButton} from "./AgentifyButton";
 import {isNullOrUndefined} from "util";
 
 
-export function AgentifyTable(props: {data: any[], columns: ColumnDef<any,any>[], title: string, rowClick?: (row: any) => void, globalFilter?: boolean, pagination?: boolean, footer?: boolean, filters?: {name: string, value: string | undefined, onChange: (event: React.ChangeEvent<HTMLSelectElement>) => void, opts: any[], takeID: boolean}[]}) {
+export function AgentifyTable(
+    props: {
+        data: any[],
+        columns: ColumnDef<any,any>[],
+        title: string,
+        rowClick?: (row: any) => void,
+        globalFilter?: boolean,
+        pagination?: boolean,
+        footer?: boolean,
+        filters?: {name: string, value: string | undefined, onChange: (event: React.ChangeEvent<HTMLSelectElement>) => void, opts: any[], takeID: boolean}[],
+        checkboxes?: {name: string, label: string, checked: boolean, onInput: (event: React.FormEvent) => void}[],
+    })
+{
     const onRowClick = props.rowClick || (() => {});
     const hasGlobalFilter = props.globalFilter || false;
     const [pagination, setPagination] = useState({
@@ -24,6 +36,7 @@ export function AgentifyTable(props: {data: any[], columns: ColumnDef<any,any>[]
         pageSize: 10,
     });
     const filters = props.filters || [];
+    const checkboxes = props.checkboxes || [];
     const [globalFilter, setGlobalFilter] = React.useState('');
     const paginationEnabled = props.pagination == undefined ? true : props.pagination;
     const footerEnabled = props.footer || false
@@ -84,6 +97,14 @@ export function AgentifyTable(props: {data: any[], columns: ColumnDef<any,any>[]
                                         )
                                     }
                                 </select>
+                            </div>
+                        ))
+                    }
+                    {checkboxes.length>0 &&
+                        checkboxes.map((checkbox) => (
+                            <div className="selection">
+                                <label htmlFor={checkbox.name}>{checkbox.label}</label>
+                                <input type="checkbox" name={checkbox.name} checked={checkbox.checked} onInput={checkbox.onInput}/>
                             </div>
                         ))
                     }
