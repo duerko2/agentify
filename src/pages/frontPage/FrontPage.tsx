@@ -7,7 +7,8 @@ import {Tabs} from "../../routing/Tabs";
 import {BrandsPolarAxis} from "./BrandsPolarAxis";
 import {AgentifyTable} from "../../component/AgentifyTable";
 import {getPreOrderColumns, getReOrderColumns} from "./overviewTable/FrontPageTableColumns";
-import OverviewTable from "./overviewTable/OverviewTable";
+import seasonsOverTime from "../../assets/commission over seasons.png"
+import burnUpChartDiagram from "../../assets/burnup.png"
 
 type Order = {
     amount:number;
@@ -250,18 +251,21 @@ function FrontPage() {
                 </div>
                 <div className="chart-container">
                     <p>Burn up chart</p>
-                    <canvas id="preOrderChart" width="400" height="400"></canvas>
+                    <img src={burnUpChartDiagram} alt="burnup" width="400" height="300"/>
                 </div>
                 <div className="chart-container">
                     <p>Commission over seasons</p>
-                    <canvas id="reOrderChart" width="400" height="400"></canvas>
+                    <img src={seasonsOverTime} alt="commission over seasons" width="400" height="300"/>
                 </div>
 
                 <div className="component-wrapper">
                     <p>Top 5 customers by commission:</p>
-                    {top5Customers.map((info) =>
-                        <p key={info.customer.id}>{info.customer.name} {info.commission.toLocaleString()} {selectedCurrency}</p>
-                    )}
+                    <div style={{display:"grid", gridTemplateColumns:"100px auto"}}>
+                        {top5Customers.map((info) =>
+                            <><p key={info.customer.id}>{info.customer.name}: </p>
+                                <p><b>{info.commission.toFixed(2).toLocaleString()}</b> {selectedCurrency}</p></>
+                        )}
+                    </div>
                 </div>
 
             </div>

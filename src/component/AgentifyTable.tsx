@@ -33,7 +33,7 @@ export function AgentifyTable(
     const hasGlobalFilter = props.globalFilter || false;
     const [pagination, setPagination] = useState({
         pageIndex: 0,
-        pageSize: 10,
+        pageSize: 25,
     });
     const filters = props.filters || [];
     const checkboxes = props.checkboxes || [];
@@ -216,7 +216,7 @@ export function AgentifyTable(
                             table.setPageSize(Number(e.target.value))
                         }}
                     >
-                        {[10, 20, 30, 40, 50].map(pageSize => (
+                        {[25, 50, 75, 100].map(pageSize => (
                             <option key={pageSize} value={pageSize}>
                                 Show {pageSize}
                             </option>

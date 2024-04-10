@@ -21,19 +21,19 @@ export function getPreOrderColumns(data: { brand: Brand; orderTotal: number; bud
         columnHelper.accessor("budgetTotal", {
             header: "Budget",
             cell: (info) => info.getValue().toLocaleString(),
-            footer: data.reduce((a,b) => a + b.budgetTotal/conversions[b.brand.currency], 0).toLocaleString(),
+            footer: data.reduce((a,b) => a + b.budgetTotal/conversions[b.brand.currency], 0).toFixed(1).toLocaleString(),
             id: "budget"
         }),
         columnHelper.accessor("orderTotal", {
             header: "Orders",
             cell: (info) => info.getValue().toLocaleString(),
-            footer: data.reduce((a,b) => a + b.orderTotal/conversions[b.brand.currency], 0).toLocaleString(),
+            footer: data.reduce((a,b) => a + b.orderTotal/conversions[b.brand.currency], 0).toFixed(1).toLocaleString(),
             id: "orders"
         }),
         columnHelper.accessor("brand", {
             header: "Difference",
             cell: (info) => (info.row.original.orderTotal - info.row.original.budgetTotal).toLocaleString(),
-            footer: data.reduce((a,b) => a + (b.orderTotal - b.budgetTotal)/conversions[b.brand.currency], 0).toLocaleString(),
+            footer: data.reduce((a,b) => a + (b.orderTotal - b.budgetTotal)/conversions[b.brand.currency], 0).toFixed(1).toLocaleString(),
             id: "difference"
         }),
         columnHelper.accessor("brand", {
@@ -57,19 +57,19 @@ export function getPreOrderColumns(data: { brand: Brand; orderTotal: number; bud
         columnHelper.accessor("brand", {
             header: "Budgeted Commission",
             cell: (info) => (info.getValue().commission * info.row.original.budgetTotal*0.01).toLocaleString(),
-            footer: info => data.reduce((a,b) => a + b.budgetTotal*b.brand.commission*0.01/conversions[b.brand.currency], 0).toLocaleString(),
+            footer: info => data.reduce((a,b) => a + b.budgetTotal*b.brand.commission*0.01/conversions[b.brand.currency], 0).toFixed(1).toLocaleString(),
             id: "budgetCommission"
         }),
         columnHelper.accessor("brand", {
             header: "Expected Commission",
             cell: (info) => (info.getValue().commission * info.row.original.orderTotal*0.01).toLocaleString(),
-            footer: info => data.reduce((a,b) => a + b.orderTotal*b.brand.commission*0.01/conversions[b.brand.currency], 0).toLocaleString(),
+            footer: info => data.reduce((a,b) => a + b.orderTotal*b.brand.commission*0.01/conversions[b.brand.currency], 0).toFixed(1).toLocaleString(),
             id: "expCommission"
         }),
         columnHelper.accessor("brand", {
             header: "Difference",
             cell: (info) => ((info.getValue().commission * info.row.original.orderTotal*0.01) - (info.getValue().commission * info.row.original.budgetTotal*0.01)).toLocaleString(),
-            footer: info => (data.reduce((a,b) => a + b.orderTotal*b.brand.commission*0.01/conversions[b.brand.currency], 0) - data.reduce((a,b) => a + b.budgetTotal*b.brand.commission*0.01/conversions[b.brand.currency], 0)).toLocaleString(),
+            footer: info => (data.reduce((a,b) => a + b.orderTotal*b.brand.commission*0.01/conversions[b.brand.currency], 0) - data.reduce((a,b) => a + b.budgetTotal*b.brand.commission*0.01/conversions[b.brand.currency], 0)).toFixed(1).toLocaleString(),
             id: "commissionDifference"
         }),
         columnHelper.accessor("brand", {

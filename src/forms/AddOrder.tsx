@@ -158,12 +158,9 @@ function AddOrder() {
 
         // Reset the form
         setOrder(
-            {
+            {...order,
                 amount:0,
-                brand:doc(db,"brand/1"),
                 customer:doc(db,"customer/1"),
-                season:doc(db,"season/1"),
-                type:"",
                 uid:"",
                 id:""
             }
