@@ -5,22 +5,20 @@ import {auth, db} from "../../../firebase/firebase";
 import {onAuthStateChanged} from "firebase/auth";
 import {getBrandColumns} from "./BrandTableColumns";
 import {AgentifyTable} from "../../../component/AgentifyTable";
+import {useAgency} from "../../../firebase/AgencyContext";
+import {getAllBrands} from "../../../services/BrandService";
 
 export function BrandTable() {
+    const { agency } = useAgency();
     const [data, setData] = useState<Brand[]>([]);
 
     useEffect(() => {
         async function getBrands() {
-            const brandsQuery = query(collection(db, "brand"), where("uid", "==", auth.currentUser?.uid));
-            const brandsData = await getDocs(brandsQuery);
-            const brands: Brand[] = brandsData.docs.map((doc) => {
-                return (
-                    {
-                        name: doc.data().name,
-                        commission: doc.data().commission,
-                        currency: doc.data().currency,
-                    } as Brand);
-            });
+            const brands = await getAllBrands(agency);
+
+            if(!brands) {
+                return;
+            }
             setData(brands)
         }
 

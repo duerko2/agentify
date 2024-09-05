@@ -6,20 +6,29 @@ interface CustomerBrand {
     id: string;
     ref: DocumentReference<DocumentData>;
 }
+export interface Agency {
+    agencyId: string;
+    name: string;
+}
 interface Brand {
     name: string;
     commission: number;
     currency: string;
-    uid: string;
+    brandId: string;
 }
 
 interface Customer {
+    zipCode: string;
     id: string;
     address: string;
     name: string;
     city: string;
     country: string;
     brands: CustomerBrand[];
+    brandIds: string[];
+    brandNames: string[];
+    customerId: string;
+    email: string;
 }
 export type Order = {
     amount:number;

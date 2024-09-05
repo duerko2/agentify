@@ -8,7 +8,7 @@ import {BrandsPolarAxis} from "./BrandsPolarAxis";
 import {AgentifyTable} from "../../component/AgentifyTable";
 import {getPreOrderColumns, getReOrderColumns} from "./overviewTable/FrontPageTableColumns";
 import seasonsOverTime from "../../assets/commission over seasons.png"
-import burnUpChartDiagram from "../../assets/burnup.png"
+import burnUpChartDiagram from '../../assets/burnup.png'
 
 type Order = {
     amount:number;
@@ -104,9 +104,10 @@ function FrontPage() {
             setSelectedSeason(seasons.length-1);
         }
         async function getCurrenciesInformation(){
-            setAvailableCurrencies(await getCurrencies());
+            setAvailableCurrencies(getCurrencies());
         }
         if(auth.currentUser){
+            console.log(auth.currentUser.toJSON());
             getBrands().then(getCurrenciesInformation);
             getSeasons();
         }

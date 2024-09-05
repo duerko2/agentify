@@ -8,51 +8,27 @@ import "../../../styles/tables.css";
 import "../../../styles/overlays.css";
 import {AgentifyTable} from "../../../component/AgentifyTable";
 import {getCustomerColumns} from "./CustomerTableColumns";
+import {getAllCustomers} from "../../../services/CustomerService";
+import {useAgency} from "../../../firebase/AgencyContext";
 
 
 
 export function CustomersTable() {
+    const { agency } = useAgency();
     const [data, setData] = useState<Customer[]>([]);
-    const [changeCustomer, setChangeCustomer] = useState<{show:boolean,customer:Customer}>({show:false,customer: {id:"",name:"",address:"",city:"",country:"",brands:[]}});
-    const brandMap = new Map<string, string>();
+    const [changeCustomer, setChangeCustomer] = useState<{show:boolean,customer:Customer}>({show:false, customer:{id:"", name:"",address:"",city:"",zipCode:"", country:"", email:"",brandIds:[], customerId:"", brands:[], brandNames:[]}});
 
     useEffect(() => {
         async function getData() {
-            const customerQuery = query(collection(db, "customer"), where("uid", "==", auth.currentUser?.uid));
-            const customerdata = await getDocs(customerQuery);
-            const customers: Customer[] = customerdata.docs.map((doc) => (
-                {
-                    id : doc.id,
-                    name: doc.data().name,
-                    address: doc.data().address,
-                    city: doc.data().city,
-                    country: doc.data().country,
-                    brands: doc.data().brands?.map(
-                        (brand: DocumentReference) =>
-                            (
-                                {
-                                    name: brandMap.get(brand.id),
-                                    id: brand.id
-                                } as CustomerBrand)),
-                } as Customer));
-            setData(customers);
-        };
-
-        async function getBrands() {
-            const brandsQuery = query(collection(db, "brand"), where("uid", "==", auth.currentUser?.uid));
-            const brandsData = await getDocs(brandsQuery);
-            brandsData.docs.forEach((doc) => {
-                brandMap.set(doc.id, doc.data().name);
-            });
+            const customers = await getAllCustomers(agency);
+            console.log(customers);
+            setData(customers ?? []);
         }
+
         if(auth.currentUser) {
-            getBrands().then(getData);
+            getData();
         }
-        onAuthStateChanged(auth, (nextUser) => {
-            getBrands().then(getData);
-        });
-
-    }, [changeCustomer]);
+    }, []);
 
     const columns = getCustomerColumns();
 

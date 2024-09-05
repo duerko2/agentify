@@ -70,3 +70,6 @@ tbody tr:hover {
     margin-inline-start: 0px;
     margin-inline-end: 0px;
 }
+.table-header-cell{
+    cursor: pointer;
+}

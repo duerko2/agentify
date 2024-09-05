@@ -3,6 +3,7 @@ import {auth} from "../firebase/firebase";
 import {CustomerBrand} from "../types/Types";
 import "../styles/TopBar.css";
 import Logo from "../assets/logo.png";
+import {useAgency} from "../firebase/AgencyContext";
 
 function TopBarItem(props: { onClick : (destination:string) => void, name: string }) {
     const [active, setActive] = useState<{ active: boolean, classname: string }>({
@@ -37,6 +38,7 @@ function TopBarItem(props: { onClick : (destination:string) => void, name: strin
 }
 
 function TopBar(props: { navigate: (dest:string)=>void,loggedIn: boolean }) {
+    const { setAgency } = useAgency();
     const { loggedIn } = props;
     const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
 
@@ -45,6 +47,7 @@ function TopBar(props: { navigate: (dest:string)=>void,loggedIn: boolean }) {
     }
     function handleLogout(){
         auth.signOut();
+        setAgency({agencyId:"",name:""});
     }
     function route(destination: string){
         props.navigate(destination);

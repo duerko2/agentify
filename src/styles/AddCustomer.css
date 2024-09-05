@@ -1,7 +1,9 @@
 .brandContainer{
     display: flex;
     flex-direction: row;
-    justify-content: center;
+    flex-wrap: wrap;
+    justify-content: space-evenly;
+    margin: 0 0 15px 0;
 }
 .brandCard{
     margin: 10px;
@@ -23,4 +25,50 @@
     font-weight: bold;
     cursor: pointer;
     background-color: #f2f2f2;
+}
+
+.form-container {
+    text-align: initial;
+    padding: 10px;
+    overflow-x: auto;
+    background-color: white;
+    margin: 25px;
+    box-shadow: 2px 2px 2px 2px #cccccc;
+    flex-grow:1;
+    width: fit-content;
+}
+
+.input-field {
+    margin: 0px 10px 10px 10px;
+    padding: 0px 10px 10px 10px;
+    border-radius: 5px;
+    text-align: left;
+}
+.input-field-full-width {
+    margin: 0px 10px 10px 10px;
+    padding: 0px 18px 10px 10px;
+    border-radius: 5px;
+    text-align: left;
+    width: 100%;
+}
+.input-line {
+    display: flex;
+    justify-content: space-between;
+    margin: 0px 10px 0px 0px;
+    padding: 0px 10px 0px 0px;
+    width: 100%
+}
+label p{
+    margin: 4px 4px 4px 4px;
+    color: dimgrey;
+}
+form h4{
+    margin: 2.5em 1em 1em 1em;
+}
+.full-width{
+    width: 100%;
+}
+form input {
+    height:1.2em;
+    font-size:1.1em;
 }

@@ -4,16 +4,14 @@ import {
     ColumnDef, FilterFn,
     flexRender,
     getCoreRowModel, getFilteredRowModel,
-    getPaginationRowModel,
+    getPaginationRowModel, getSortedRowModel, SortingState,
     useReactTable
 } from "@tanstack/react-table";
 import {
     rankItem,
 } from '@tanstack/match-sorter-utils'
 
-
 import {AgentifyButton} from "./AgentifyButton";
-import {isNullOrUndefined} from "util";
 
 
 export function AgentifyTable(
@@ -35,6 +33,7 @@ export function AgentifyTable(
         pageIndex: 0,
         pageSize: 25,
     });
+    const [sorting, setSorting] = React.useState<SortingState>([])
     const filters = props.filters || [];
     const checkboxes = props.checkboxes || [];
     const [globalFilter, setGlobalFilter] = React.useState('');
@@ -60,23 +59,28 @@ export function AgentifyTable(
             fuzzy: fuzzyFilter,
         },
         getCoreRowModel: getCoreRowModel(),
+        getSortedRowModel: getSortedRowModel(), //provide a sorting row model
+        onSortingChange: setSorting,
         getPaginationRowModel: getPaginationRowModel(),
         onPaginationChange: setPagination,
         state: {
             globalFilter,
             pagination,
+            sorting,
         },
         defaultColumn: {
             minSize: 0,
             size: Number.MAX_SAFE_INTEGER,
             maxSize: Number.MAX_SAFE_INTEGER,
         },
+
         onGlobalFilterChange: setGlobalFilter,
         globalFilterFn: fuzzyFilter,
         getFilteredRowModel: getFilteredRowModel(),
-
-
     });
+    console.log(props.data);
+    console.log(props.columns);
+    console.log(table.getRowModel().rows.map(row => row.original));
 
     return (
         <div className="table">
@@ -125,17 +129,36 @@ export function AgentifyTable(
                                 <th key={header.id}>
                                     {header.isPlaceholder
                                         ? null
-                                        : flexRender(
-                                            header.column.columnDef.header,
-                                            header.getContext()
-                                        )}
+                                        : (<div
+                                            className="table-header-cell"
+                                            onClick={header.column.getToggleSortingHandler()}
+                                            title={
+                                                header.column.getCanSort()
+                                                    ? header.column.getNextSortingOrder() === 'asc'
+                                                        ? 'Sort ascending'
+                                                        : header.column.getNextSortingOrder() === 'desc'
+                                                            ? 'Sort descending'
+                                                            : 'Clear sort'
+                                                    : undefined
+                                            }
+                                        >
+                                            {flexRender(
+                                                header.column.columnDef.header,
+                                                header.getContext()
+                                            )}
+                                            {{
+                                                asc: ' 🔼',
+                                                desc: ' 🔽',
+                                            }[header.column.getIsSorted() as string] ?? null}
+                                        </div>)
+                                        }
                                 </th>
                             ))}
                         </tr>
                     ))}
                     </thead>
                     <tbody>
-                    {table.getRowModel().rows.map(row => (
+                    {table.getCoreRowModel().rows.map(row => (
                         <tr key={row.id} onClick={()=>onRowClick(row.original)}>
                             {row.getVisibleCells().map(cell => (
                                 <td key={cell.id}>

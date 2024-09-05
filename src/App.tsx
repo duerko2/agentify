@@ -3,7 +3,7 @@ import './styles/App.css';
 import Login from "./pages/loginPage/Login";
 import {auth} from './firebase/firebase';
 import {onAuthStateChanged} from 'firebase/auth';
-import AddCustomer from "./forms/AddCustomer";
+import AddCustomer from "./forms/addCustomerForm/AddCustomer";
 import AddBrand from "./forms/AddBrand";
 import TopBar from "./routing/TopBar";
 import CustomerPage from "./pages/customerPage/CustomerPage";
@@ -13,11 +13,14 @@ import FrontPage from "./pages/frontPage/FrontPage";
 import {SeasonsPage} from "./pages/seasonPage/SeasonsPage";
 import BudgetPage from "./pages/budgetPage/BudgetPage";
 import {HomePage} from "./pages/HomePage/HomePage";
+import {getAgencyByUserID} from "./services/AgencyService";
+import {useAgency} from "./firebase/AgencyContext";
 
 function App() {
     const [loggedIn, setLoggedIn] = useState<boolean>(false);
     const [page, setPage] = useState<string>("frontpage");
     const [navigating, setNavigating] = useState<boolean>(true);
+    const { setAgency } = useAgency();
 
     useEffect(() => {
         function popstateHandler() {
@@ -55,6 +58,15 @@ function App() {
             }
         });
         }, []);
+
+    useEffect(()=> {
+        if (loggedIn) {
+            const uid = auth.currentUser?.uid;
+            if (uid) {
+                getAgencyByUserID(uid, setAgency);
+            }
+        }
+    }, [loggedIn]);
 
     function navigate(dest:string) {
         history.pushState({}, "", "?page="+dest);

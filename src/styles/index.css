@@ -23,3 +23,7 @@ code {
 p{
   margin:0.4em;
 }
+
+input {
+  line-height: 1.5em;
+}

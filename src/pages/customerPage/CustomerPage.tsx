@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react";
-import AddCustomer from "../../forms/AddCustomer";
+import AddCustomer from "../../forms/addCustomerForm/AddCustomer";
 import "../../styles/tables.css"
 import {Tabs} from "../../routing/Tabs";
 import {CustomersTable} from "./customerTable/CustomersTable";
